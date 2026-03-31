@@ -20,7 +20,7 @@ cluster:
 runner:
   task_type: embodied
   logger:
-    log_path: /workspace/results/robotwin_grpo_openvlaoft
+    log_path: /home/zy/code/rlinf_open_source/RLinf/results/robotwin_grpo_openvlaoft_local
     project_name: rlinf
     experiment_name: "ci-test"
     logger_backends: ["tensorboard"] # wandb, swanlab
@@ -130,7 +130,7 @@ actor:
 
   # Override the default values in model/openvla_oft
   model:
-    model_path: "/workspace/dataset/RLinf-OpenVLAOFT-RoboTwin-SFT-place_empty_cup"
+    model_path: "/home/zy/code/rlinf_open_source/RLinf/model/RLinf-OpenVLAOFT-RoboTwin-SFT-place_empty_cup"
     implement_version: "official"
     model_type: "openvla_oft"
     value_type: ${algorithm.reward_type}  # 'action' or 'token'

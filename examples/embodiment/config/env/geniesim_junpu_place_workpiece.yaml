@@ -1,0 +1,87 @@
+env_type: geniesim
+total_num_envs: null
+
+backend: mujoco
+mjx_publish_tf: false
+
+auto_reset: true
+ignore_terminations: false
+reward_coef: 1.0
+use_rel_reward: false
+enable_reward: false   # task has no ADER benchmark yet
+seed: 42
+max_episode_steps: 300
+video_cfg: {}
+
+init_params:
+  id: junpu_place_workpiece
+  task_description: "Place the workpiece into the target slot on the Junpu workstation."
+
+  # ---- Asset paths (absolute) ----
+  mjcf_path: /home/zy/code/rlinf_open_source/g2sim/mujoco_assets/model/junpu_place_workpiece.xml
+  task_file: ""   # leave empty when enable_reward is false
+
+  # ---- Robot ----
+  robot_type: G2
+  robot_cfg: G2_omnipicker
+  state_dim: 28
+  action_dim: 14
+  # G2 model: 5 body joints come before arm joints in non-free joint order.
+  # state_joint_offset=5 skips body joints → states start from arm_l_joint1.
+  state_joint_offset: 5
+  # G2 model: arm position actuators start at ctrl index 24 (left arm) + 31 (right arm).
+  # ctrl_offset=24 maps host actions[0:14] → data.ctrl[24:38] (both arms).
+  ctrl_offset: 24
+
+  # ---- Control mode ----
+  # ee: actions = [pos_l(3), euler_xyz_l(3), pos_r(3), euler_xyz_r(3), gripper_l, gripper_r]
+  #      IK (damped Jacobian) runs on the simulation side.
+  control_mode: ee
+  # G2 + Junpu hand gripper actuator ctrl indices.
+  gripper_ctrl_l: 52    # ctrl[52] for G2+junpu
+  gripper_ctrl_r: 53    # ctrl[53] for G2+junpu
+  # End-effector body names for IK.
+  ee_body_l: arm_l_link7
+  ee_body_r: arm_r_link7
+  # IK solver parameters.
+  ik_max_iter: 10       # Jacobian iterations per control step
+  ik_damp: 0.05         # damping factor λ for damped least squares
+
+  # ---- Cameras ----
+  cam_width:  640
+  cam_height: 480
+  main_cam_prim:  /camera_main
+  wrist_cam_prim: ""   # set to /camera_wrist to enable wrist cam
+
+  # ---- Sim ----
+  physics_hz:    1000
+  render_hz:     30.0
+  headless:      true
+  ros_domain_id: 0
+  # Paths used in HOST mode (no container).  Ignored when container_cfg is set.
+  isaac_python:  /home/zy/isaac-sim-5.1/python.sh
+  # Python with mujoco installed.  Use conda/system python, NOT the RLinf venv.
+  mujoco_python: /home/zy/anaconda3/bin/python3
+  shm_name:      geniesim_frames
+  task_instance_id: 0
+
+# ---- Container mode (recommended) ----
+container_cfg:
+  image:    geniesim-rlinf:latest
+  name:     geniesim_rlinf_sim
+  geniesim_root: /home/zy/code/rlinf_open_source
+
+  # Container-side path overrides (replace host paths in init_params above).
+  container_paths:
+    isaac_python:  /isaac-sim/python.sh
+    mujoco_python: python3
+    mjcf_path: /geniesim/main/g2sim/mujoco_assets/model/junpu_place_workpiece.xml
+
+  # Lifecycle options
+  keep_alive:          false  # true = leave container running after env.close()
+  reuse_running:       true   # true = skip restart if container is already ready
+  startup_timeout_sec: 300    # Isaac Sim cold-start can take ~2-3 min
+
+  ros_domain_id: 0            # must match init_params.ros_domain_id above
+  isaac_cache_root: ~/docker/isaac-sim  # host path to Isaac Sim cache/pkg dirs
+  extra_docker_args: []       # additional `docker run` flags if needed
