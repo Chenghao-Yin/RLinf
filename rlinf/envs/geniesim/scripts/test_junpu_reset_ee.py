@@ -59,9 +59,16 @@ EXPECTED_RPY = np.array([-3.12832732, 0.5282591, -3.11193856])
 POS_TOL = 0.02   # 2 cm
 RPY_TOL = 0.05   # ~3 deg
 
+_RLINF_REPO = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "..", "..", "..", "..")
+)
 CONFIG = os.path.join(
-    os.path.dirname(__file__),
-    "../configs/junpu_place_workpiece.yaml",
+    _RLINF_REPO,
+    "examples",
+    "embodiment",
+    "config",
+    "env",
+    "geniesim_junpu_place_workpiece.yaml",
 )
 
 cfg = OmegaConf.load(CONFIG)

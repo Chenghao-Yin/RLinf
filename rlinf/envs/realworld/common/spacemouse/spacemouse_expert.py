@@ -22,25 +22,26 @@ class SpaceMouseExpert:
     This class provides an interface to the SpaceMouse.
     It continuously reads the SpaceMouse state and provide
     a "get_action" method to get the latest action and button state.
+
+    Compatible with pyspacemouse >= 2.0 (open() returns a SpaceMouseDevice;
+    read() is a method on the device rather than a module-level function).
     """
 
     def __init__(self):
         import pyspacemouse
 
-        pyspacemouse.open()
+        self._device = pyspacemouse.open()
 
         self.state_lock = threading.Lock()
         self.latest_data = {"action": np.zeros(6), "buttons": [0, 0]}
         # Start a thread to continuously read the SpaceMouse state
-        self.thread = threading.Thread(target=self._read_spacemouse)
+        self.thread = threading.Thread(target=self._read_spacemouse, name="Thread-1 (_read_spacemouse)")
         self.thread.daemon = True
         self.thread.start()
 
     def _read_spacemouse(self):
-        import pyspacemouse
-
         while True:
-            state = pyspacemouse.read()
+            state = self._device.read()
             with self.state_lock:
                 self.latest_data["action"] = np.array(
                     [-state.y, state.x, state.z, -state.roll, -state.pitch, -state.yaw]
@@ -51,6 +52,9 @@ class SpaceMouseExpert:
         """Returns the latest action and button state of the SpaceMouse."""
         with self.state_lock:
             return self.latest_data["action"], self.latest_data["buttons"]
+
+    def on_episode_reset(self):
+        """Called when the environment resets. No-op for the real SpaceMouse."""
 
 
 if __name__ == "__main__":

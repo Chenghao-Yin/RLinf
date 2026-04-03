@@ -14,5 +14,14 @@
 
 from rlinf.envs.wrappers.collect_episode import CollectEpisode
 from rlinf.envs.wrappers.record_video import RecordVideo
+from rlinf.envs.wrappers.spacemouse_sim_intervention import (
+    FakeSpaceMouseExpert,
+    SpacemouseSimIntervention,
+)
 
-__all__ = ["CollectEpisode", "RecordVideo"]
+__all__ = [
+    "CollectEpisode",
+    "RecordVideo",
+    "FakeSpaceMouseExpert",
+    "SpacemouseSimIntervention",
+]

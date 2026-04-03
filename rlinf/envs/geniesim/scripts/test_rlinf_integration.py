@@ -8,7 +8,7 @@
 #   source /opt/ros/humble_311/setup.zsh
 #   GENIESIM_ROOT=$(pwd)/.. PYTHONPATH=".:${PYTHONPATH}" \
 #       .venv/bin/python3 rlinf/envs/geniesim/scripts/test_rlinf_integration.py \
-#       --config rlinf/envs/geniesim/configs/place_block_into_box.yaml \
+#       --config examples/embodiment/config/env/geniesim_place_block_into_box.yaml \
 #       [--dry-run]   # skip actual sim launch, just test class resolution
 #
 
@@ -60,7 +60,7 @@ def _ensure_ros_env():
 _ensure_ros_env()
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--config", default="rlinf/envs/geniesim/configs/place_block_into_box.yaml")
+parser.add_argument("--config", default="examples/embodiment/config/env/geniesim_place_block_into_box.yaml")
 parser.add_argument("--dry-run", action="store_true",
                     help="Only verify class resolution, don't launch simulation")
 parser.add_argument("--num-envs", type=int, default=1)

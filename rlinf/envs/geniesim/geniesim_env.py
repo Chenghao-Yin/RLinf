@@ -39,7 +39,6 @@ from __future__ import annotations
 
 import copy
 import os
-import sys
 from typing import Dict, List, Optional, Tuple
 
 import numpy as np
@@ -49,28 +48,9 @@ from omegaconf import open_dict
 
 from rlinf.envs.geniesim import REGISTER_GENIESIM_ENVS
 from rlinf.envs.geniesim.container_manager import SimContainerManager
-
-# ---------------------------------------------------------------------------
-# Bootstrap: make geniesim packages importable.
-#
-# The GENIESIM_ROOT env var can be set explicitly; otherwise we infer it from
-# this file's location (RLinf/rlinf/envs/geniesim/ → ../../../../../../).
-#
-# All simulation runs inside a Docker container managed by SimContainerManager.
-# The host process does NOT need ROS.  All host↔container communication goes
-# through POSIX shared memory (ctrl SHM for states/actions/resets; frame SHM
-# for images).
-# ---------------------------------------------------------------------------
-_gs_root = os.environ.get(
-    "GENIESIM_ROOT",
-    os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../../../")),
-)
-
-# Always: add main/source to sys.path so `geniesim.*` packages are importable.
-# Needed in both host and container modes for GenieSimVectorEnv import.
-_src = os.path.join(_gs_root, "main", "source")
-if os.path.isdir(_src) and _src not in sys.path:
-    sys.path.insert(0, _src)
+from rlinf.envs.geniesim.process_manager import SimProcessManager
+from rlinf.envs.geniesim.sim_manager_base import BaseSimManager
+from rlinf.envs.geniesim.shm_client import GenieSimShmClient, GenieSimVectorEnvConfig
 
 
 
@@ -116,24 +96,37 @@ class GenieSimBaseEnv(gym.Env):
         self.success_once = np.zeros(num_envs, dtype=bool)
         self.fail_once = np.zeros(num_envs, dtype=bool)
 
-        # ---- Container lifecycle ----
-        # The simulation always runs inside a Docker container managed by
-        # SimContainerManager.  GenieSimVectorEnv is created in attach mode:
-        # all host↔container communication goes through shared memory
+        # ---- Simulation backend lifecycle ----
+        # Three modes are supported (container_cfg.mode):
+        #   'auto' (default) — auto-detect: if GENIESIM_CONTAINER env var is set
+        #                      (i.e. running inside a GenieSim container), use
+        #                      'local'; otherwise use 'docker'.
+        #   'docker'         — simulation runs in a Docker container managed by
+        #                      SimContainerManager.
+        #   'local'          — simulation runs as a direct subprocess managed by
+        #                      SimProcessManager.  Use this when training and
+        #                      sim_server.py share the same environment (e.g. the
+        #                      merged geniesim-rlinf-train container).
+        #
+        # In both modes, host↔sim communication goes through POSIX shared memory
         # (ctrl SHM for states/actions/resets; frame SHM for images).
-        # ROS is NOT needed on the host.
+        # ROS is NOT needed on the host side.
         container_cfg = cfg.container_cfg
-        self._container_mgr = SimContainerManager(container_cfg)
+        _mode = str(getattr(container_cfg, "mode", "auto"))
+        if _mode == "auto":
+            _mode = "local" if os.environ.get("GENIESIM_CONTAINER") else "docker"
+        if _mode == "local":
+            self._container_mgr: BaseSimManager = SimProcessManager(container_cfg)
+        else:
+            self._container_mgr = SimContainerManager(container_cfg)
 
         vec_cfg = self._make_vec_env_config()
 
-        pm_kwargs = SimContainerManager.pm_kwargs_from_vec_cfg(vec_cfg)
+        pm_kwargs = BaseSimManager.pm_kwargs_from_vec_cfg(vec_cfg)
         self._container_mgr.ensure_running(pm_kwargs)
-        # Tell GenieSimVectorEnv to skip ProcessManager (container handles it).
+        # GenieSimShmClient connects to the running container via SHM only.
         vec_cfg.attach_to_running = True
-
-        from geniesim.rl.envs.geniesim_vec_env import GenieSimVectorEnv
-        self.env = GenieSimVectorEnv(vec_cfg)
+        self.env = GenieSimShmClient(vec_cfg)
 
     # ---------------------------------------------------------------------- #
     # To override in subclasses
@@ -158,10 +151,13 @@ class GenieSimBaseEnv(gym.Env):
                 _rand_json = _json.dumps(_rand_dict)
             except Exception:
                 pass
+        # init_qpos: optional list of floats in YAML → JSON string for mujoco node
+        # Overlaid onto data.qpos[:len] at every reset before randomization.
+        _init_qpos = getattr(self.cfg.init_params, "init_qpos", None)
+        _init_qpos_json = _json.dumps([float(v) for v in _init_qpos]) if _init_qpos is not None else ""
         # reset_ee_r: optional [x,y,z,roll,pitch,yaw] list in YAML → JSON string for mujoco node
         _reset_ee_r = getattr(self.cfg.init_params, "reset_ee_r", None)
         _reset_ee_r_json = _json.dumps(list(_reset_ee_r)) if _reset_ee_r is not None else ""
-        from geniesim.rl.envs.geniesim_vec_env import GenieSimVectorEnvConfig
         p = self.cfg.init_params
         return GenieSimVectorEnvConfig(
             mjcf_path=getattr(p, "mjcf_path", ""),
@@ -203,9 +199,11 @@ class GenieSimBaseEnv(gym.Env):
             ik_max_iter=getattr(p, "ik_max_iter", 10),
             ik_damp=getattr(p, "ik_damp", 0.05),
             randomization_cfg_json=_rand_json,
+            init_qpos_json=_init_qpos_json,
             reset_ee_r_json=_reset_ee_r_json,
             seed=getattr(self.cfg, "seed", 42),
             mujoco_python=getattr(p, "mujoco_python", ""),
+            info_body_names=list(getattr(p, "info_body_names", []) or []),
         )
 
     def _wrap_obs(self, obs_dict: Dict) -> Dict:
@@ -283,17 +281,49 @@ class GenieSimBaseEnv(gym.Env):
         return obs, rewards_t, terminated_t, truncated_t, infos
 
     def chunk_step(self, chunk_actions) -> Tuple:
-        """Execute a sequence of actions (chunk) across all envs."""
-        if isinstance(chunk_actions, torch.Tensor):
-            chunk_actions = chunk_actions.cpu().numpy()
+        """Execute a sequence of actions (chunk) across all envs.
 
-        obs_list_raw, chunk_rewards, chunk_terminations, chunk_truncations, infos_list = \
-            self.env.chunk_step(chunk_actions)
+        Implemented by looping over action chunks and calling ``step()`` for
+        each one.  This ensures that:
+        * per-step reward overrides defined in subclasses (e.g.
+          ``JunpuPlaceWorkpieceEnv``) are applied correctly;
+        * episode metrics and auto-reset are handled by the existing
+          ``step()`` logic;
+        * returned tensors have shape ``[num_envs, num_action_chunks]``
+          as expected by ``env_worker.py`` (``chunk_dones[:, -1]``).
+        """
+        if not isinstance(chunk_actions, torch.Tensor):
+            chunk_actions = torch.as_tensor(
+                np.asarray(chunk_actions, dtype=np.float32)
+            )
 
-        obs_list = [self._wrap_obs(o) for o in obs_list_raw]
-        chunk_rewards_t = torch.from_numpy(chunk_rewards.astype(np.float32))
-        chunk_terminations_t = torch.from_numpy(chunk_terminations)
-        chunk_truncations_t = torch.from_numpy(chunk_truncations)
+        # Normalise to [num_envs, num_action_chunks, action_dim]
+        if chunk_actions.ndim == 2:
+            chunk_actions = chunk_actions.unsqueeze(1)
+
+        num_action_chunks = chunk_actions.shape[1]
+
+        obs_list: list = []
+        rewards_list: list = []
+        terminated_list: list = []
+        truncated_list: list = []
+        infos_list: list = []
+
+        for i in range(num_action_chunks):
+            act = chunk_actions[:, i, :]  # [num_envs, action_dim]
+            obs, rewards, terminated, truncated, infos = self.step(
+                act, auto_reset=self.auto_reset
+            )
+            obs_list.append(obs)
+            rewards_list.append(rewards)
+            terminated_list.append(terminated)
+            truncated_list.append(truncated)
+            infos_list.append(infos)
+
+        # Stack: [num_envs, num_action_chunks]
+        chunk_rewards_t = torch.stack(rewards_list, dim=1)
+        chunk_terminations_t = torch.stack(terminated_list, dim=1)
+        chunk_truncations_t = torch.stack(truncated_list, dim=1)
 
         return obs_list, chunk_rewards_t, chunk_terminations_t, chunk_truncations_t, infos_list
 

@@ -1,6 +1,18 @@
+# PPO baseline config for the Junpu place-workpiece task (state-based MLP).
+#
+# Quick-start (pipeline validation / BC sanity check):
+#   cd RLinf
+#   GENIESIM_ROOT=.. \
+#   python examples/embodiment/train_embodied_agent.py \
+#       --config-path examples/embodiment/config \
+#       --config-name geniesim_junpu_ppo_mlp
+#
+# Minimal env check (no running container required for import validation):
+#   python -c "from rlinf.envs.geniesim.tasks import JunpuPlaceWorkpieceEnv; print('OK')"
+
 defaults:
-  - env/geniesim_place_block_into_box@env.train
-  - env/geniesim_place_block_into_box@env.eval
+  - env/geniesim_junpu_place_workpiece@env.train
+  - env/geniesim_junpu_place_workpiece@env.eval
   - model/mlp_policy@actor.model
   - training_backend/fsdp@actor.fsdp_config
   - override hydra/job_logging: stdout
@@ -22,15 +34,15 @@ runner:
   logger:
     log_path: "../results"
     project_name: rlinf
-    experiment_name: "geniesim_ppo_mlp"
+    experiment_name: "junpu_ppo_mlp"
     logger_backends: ["tensorboard"]
 
-  max_epochs: 200
+  max_epochs: 500
   max_steps: -1
 
-  only_eval: False
-  val_check_interval: 2
-  save_interval: 2
+  only_eval: false
+  val_check_interval: 50
+  save_interval: -1
 
   seq_length: 1
   max_prompt_length: 1
@@ -40,7 +52,7 @@ runner:
 
 algorithm:
   update_epoch: 8
-  normalize_advantages: True
+  normalize_advantages: true
   kl_penalty: kl
   group_size: 1
 
@@ -65,7 +77,6 @@ algorithm:
 
   gamma: 0.99
   gae_lambda: 0.95
-
   reward_coef: 1.0
 
   sampling_params:
@@ -85,30 +96,27 @@ env:
   group_name: EnvGroup
 
   train:
-    # num_envs per worker; total_num_envs / num_env_workers = num_envs
-    total_num_envs: 4
+    total_num_envs: 1
     group_size: ${algorithm.group_size}
     max_steps_per_rollout_epoch: 300
     max_episode_steps: 300
-
-    use_rel_reward: False
+    use_rel_reward: false
     reward_coef: ${algorithm.reward_coef}
-    is_eval: False
+    is_eval: false
     video_cfg:
-      save_video: False
-      info_on_video: False
+      save_video: false
       video_base_dir: ${runner.logger.log_path}/video/train
 
   eval:
-    total_num_envs: 4
+    total_num_envs: 1
     group_size: ${algorithm.group_size}
     max_steps_per_rollout_epoch: 300
-
-    use_rel_reward: False
+    max_episode_steps: 300
+    use_rel_reward: false
     reward_coef: ${algorithm.reward_coef}
-    is_eval: True
+    is_eval: true
     video_cfg:
-      save_video: False
+      save_video: false
       video_base_dir: ${runner.logger.log_path}/video/eval
 
 rollout:
@@ -121,8 +129,8 @@ rollout:
     model_path: ""
     precision: ${actor.model.precision}
 
-  enable_torch_compile: True
-  enable_cuda_graph: False
+  enable_torch_compile: false
+  enable_cuda_graph: false
 
 actor:
   group_name: ActorGroup
@@ -135,9 +143,9 @@ actor:
   model:
     model_type: mlp_policy
     model_path: ""
-    policy_setup: g2-qpos
-    obs_dim: 40      # state_dim: arm+gripper joints (pos+vel), matches env init_params
-    action_dim: 14   # 14 joint position targets
+    policy_setup: g2-ee
+    obs_dim: 40              # state_dim=40: 28 joint (pos+vel) + 12 EE
+    action_dim: 14           # [pos_l(3), rpy_l(3), pos_r(3), rpy_r(3), grip_l, grip_r]
     num_action_chunks: 1
     hidden_dim: 256
     precision: "32"
@@ -168,16 +176,13 @@ actor:
     use_orig_params: false
     use_liger_kernel: false
     fsdp_size: -1
-
     mixed_precision:
       param_dtype: ${actor.model.precision}
       reduce_dtype: ${actor.model.precision}
       buffer_dtype: ${actor.model.precision}
-
     amp_autocast:
       enabled: false
       precision: "bf16"
-
     grad_scaler:
       enabled: false
 

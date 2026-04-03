@@ -18,8 +18,19 @@ from omegaconf import OmegaConf, open_dict
 from rlinf.envs.geniesim.tasks import junpu_place_workpiece  # noqa
 from rlinf.envs.geniesim import REGISTER_GENIESIM_ENVS
 
-cfg = OmegaConf.load(os.path.join(os.path.dirname(__file__),
-                                   "../configs/junpu_place_workpiece.yaml"))
+_RLINF_REPO = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "..", "..", "..", "..")
+)
+cfg = OmegaConf.load(
+    os.path.join(
+        _RLINF_REPO,
+        "examples",
+        "embodiment",
+        "config",
+        "env",
+        "geniesim_junpu_place_workpiece.yaml",
+    )
+)
 EnvCls = REGISTER_GENIESIM_ENVS["junpu_place_workpiece"]
 with open_dict(cfg):
     cfg.init_params.num_envs = 1

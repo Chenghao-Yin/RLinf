@@ -20,3 +20,15 @@ def register_geniesim_env(task_id: str):
         REGISTER_GENIESIM_ENVS[task_id] = cls
         return cls
     return _register
+
+
+def _import_all_tasks():
+    """Import all task modules to trigger @register_geniesim_env decorators."""
+    # Delayed import to avoid circular dependencies at module load time.
+    from rlinf.envs.geniesim.tasks import (  # noqa: F401
+        JunpuPlaceWorkpieceEnv,
+        PlaceBlockIntoBoxEnv,
+    )
+
+
+_import_all_tasks()

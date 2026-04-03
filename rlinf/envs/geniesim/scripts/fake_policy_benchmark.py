@@ -12,7 +12,7 @@
 # Usage (ROS must be sourced; run from RLinf/ repo root):
 #   GENIESIM_ROOT=.. PYTHONPATH=".:${PYTHONPATH}" \
 #       .venv/bin/python3 rlinf/envs/geniesim/scripts/fake_policy_benchmark.py \
-#       --config rlinf/envs/geniesim/configs/place_block_into_box.yaml \
+#       --config examples/embodiment/config/env/geniesim_place_block_into_box.yaml \
 #       [--num-envs 1] [--steps 20] [--policy zero|random|sin] [--action-dim 14]
 
 from __future__ import annotations
@@ -283,7 +283,7 @@ def run_benchmark(
 def main() -> None:
     parser = argparse.ArgumentParser(description="GenieSimEnv fake-policy benchmark")
     parser.add_argument("--config",
-                        default="rlinf/envs/geniesim/configs/place_block_into_box.yaml")
+                        default="examples/embodiment/config/env/geniesim_place_block_into_box.yaml")
     parser.add_argument("--num-envs", type=int, default=1)
     parser.add_argument("--steps", type=int, default=20,
                         help="Steps to run per policy")

@@ -17,7 +17,8 @@ video_cfg: {}
 
 # ---- Object alias map ----
 # Maps a short human-readable name to the internal identifiers used by the
-# simulation stack.  Reference these names in the randomization config below.
+# simulation stack.  Reference these names in the randomization config below
+# instead of raw MuJoCo body paths or USD prim paths.
 #
 #   mujoco_body — body name inside the MuJoCo XML / physics simulation
 #   usd_prim    — prim path inside the Isaac Sim USD scene
@@ -84,21 +85,47 @@ init_params:
   id: place_block_into_box
   task_description: "Pick up the red block and place it inside the box."
 
-  # ---- Asset paths (absolute) ----
-  mjcf_path: /home/zy/code/rlinf_open_source/g2sim/mujoco_assets/model/place_block_into_box.xml
+  # ---- Asset paths ----
+  # Uses GENIESIM_ROOT env var so the same config works on the host and in the container.
+  # NOTE: place_block_into_box uses a different robot/scene than junpu; its MJCF
+  # assets have NOT been migrated from g2sim yet. Use junpu_place_workpiece for active development.
+  mjcf_path: ${oc.env:GENIESIM_ROOT}/g2sim/assets/mujoco/place_block_into_box.xml
   task_file: ""   # leave empty when enable_reward is false
 
   # ---- Robot ----
   robot_type: G2
   robot_cfg: G2_omnipicker
-  state_dim: 28
+  state_dim: 40
   action_dim: 14
-  # G2 model: 5 body joints come before arm joints in non-free joint order.
-  # state_joint_offset=5 skips body joints → states start from arm_l_joint1.
-  state_joint_offset: 5
-  # G2 model: arm position actuators start at ctrl index 24 (left arm) + 31 (right arm).
-  # ctrl_offset=24 maps host actions[0:14] → data.ctrl[24:38] (both arms).
+  # G2_t2v2 joint order: wheel(8) + body(5) + head(3) + arm_l(7) + gripper_l(6) + arm_r(7) + gripper_r(6)
+  # state_joint_offset=16 skips wheel/body/head joints → states start from arm_l_joint1.
+  # state_dim=40 covers arm_l(7) + gripper_l(6) + arm_r(7) = 20 joints × (pos+vel).
+  # Policy should index: pos_arm_l=state[0:7], pos_arm_r=state[13:20]
+  #                      vel_arm_l=state[20:27], vel_arm_r=state[33:40]
+  state_joint_offset: 16
+  # G2_t2v2 actuator layout: left-pos[24:31], left-motor[31:38], right-pos[38:45].
+  # ctrl_offset=24 (left arm), ctrl_offset_r=38 (right arm, non-contiguous).
   ctrl_offset: 24
+  ctrl_offset_r: 38
+
+  # ---- Reset joint positions ----
+  # init_qpos: initial qpos overlay applied at every reset.
+  # Actual qpos layout (verified from MuJoCo XML, model.nq=98):
+  #   qpos[0:7]   free joint; qpos[7:15] wheel(8); qpos[15:20] body(5); qpos[20:23] head(3)
+  #   qpos[23:30] arm_l(7);   qpos[30:36] gripper_l(6); qpos[36:43] arm_r(7); qpos[43:49] gripper_r(6)
+  #   qpos[49:98] object free joints (7 objects × 7, managed by scene; do not set here)
+  # Layout: [free(7), wheel(8), body(5), head(3), arm_l(7), gripper_l(6), arm_r(7), gripper_r(6)]
+  # All robot joints default to zero (neutral pose); override specific entries as needed.
+  init_qpos: [
+    0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0,       # qpos[0:7]   free joint (pos + quat)
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,  # qpos[7:15]  wheel joints 1-8
+    0.0, 0.0, 0.0, 0.0, 0.0,                  # qpos[15:20] body joints 01-05
+    0.0, 0.0, 0.0,                             # qpos[20:23] head joints 1-3 (yaw, pitch, roll)
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,        # qpos[23:30] arm_l joints 1-7
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0,             # qpos[30:36] gripper_l joints 1-6
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,        # qpos[36:43] arm_r joints 1-7
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0,             # qpos[43:49] gripper_r joints 1-6
+  ]
 
   # ---- Control mode ----
   # joint: actions = [14 arm joints] or [14 arm joints + 2 grippers] when gripper_ctrl_* >= 0
@@ -127,43 +154,27 @@ init_params:
   render_hz:     30.0
   headless:      true
   ros_domain_id: 0
-  # Paths used in HOST mode (no container).  Ignored when container_cfg is set.
-  isaac_python:  /home/zy/isaac-sim-5.1/python.sh
-  # Python with mujoco installed.  Use conda/system python, NOT the RLinf venv.
-  mujoco_python: /home/zy/anaconda3/bin/python3
   shm_name:      geniesim_frames
   task_instance_id: 0
 
-# ---- Container mode (recommended) ----
-# When present, SimContainerManager starts the Docker container and
-# GenieSimVectorEnv runs in attach mode.
-#
-# Host ↔ container communication uses POSIX shared memory only — NO host-side
-# ROS installation is required.  SHM is shared via --ipc=host:
-#   - Frame SHM    (geniesim_frames):       camera images, written by Isaac Sim
-#   - Ctrl SHM     (geniesim_frames_ctrl_N): states / actions / reset per env
-#
-# Visualization: set headless: false (in init_params above) to get the Isaac
-# Sim 3D window.  X11 forwarding is added automatically — no extra_docker_args.
-#
-# Remove this section to run simulation processes directly on the host instead
-# (host ROS environment must be sourced in that case).
+# ---- Container / process manager ----
+# mode is auto-detected: inside a GenieSim container (GENIESIM_CONTAINER env var
+# is set) → local mode (subprocess); otherwise → docker mode.
+# Set mode explicitly to "docker" or "local" to override auto-detection.
 container_cfg:
+  geniesim_root: ${oc.env:GENIESIM_ROOT}
+
+  # Docker mode settings (ignored in local mode)
   image:    geniesim-rlinf:latest
   name:     geniesim_rlinf_sim
-  geniesim_root: /home/zy/code/rlinf_open_source
+  isaac_cache_root: ~/docker/isaac-sim
+  extra_docker_args: []
 
-  # Container-side path overrides (replace host paths in init_params above).
-  container_paths:
-    isaac_python:  /isaac-sim/python.sh
-    mujoco_python: python3
-    mjcf_path: /geniesim/main/g2sim/mujoco_assets/model/place_block_into_box.xml
+  # Local mode settings (ignored in docker mode)
+  ros_ws_install: /geniesim/ros_ws_build/install
 
-  # Lifecycle options
-  keep_alive:          false  # true = leave container running after env.close()
-  reuse_running:       true   # true = skip restart if container is already ready
-  startup_timeout_sec: 300    # Isaac Sim cold-start can take ~2-3 min
-
-  ros_domain_id: 0            # must match init_params.ros_domain_id above
-  isaac_cache_root: ~/docker/isaac-sim  # host path to Isaac Sim cache/pkg dirs
-  extra_docker_args: []       # additional `docker run` flags if needed
+  # Shared settings
+  keep_alive:          true
+  reuse_running:       true
+  startup_timeout_sec: 300
+  ros_domain_id: 0
