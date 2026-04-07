@@ -109,6 +109,7 @@ embodied = [
     "imageio[ffmpeg]",
     "gymnasium",
     "gym",
+    "pyspacemouse==1.1.5",
 ]
 franka = [
     "pyyaml",

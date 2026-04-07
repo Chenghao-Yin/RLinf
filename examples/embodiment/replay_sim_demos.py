@@ -186,6 +186,7 @@ def main():
         cfg.init_params.num_envs = m
 
     action_dim: int = cfg.init_params.get("action_dim", 14)
+    model_action_dim: int = cfg.init_params.get("model_action_dim", action_dim)
 
     # ---- 3. Instantiate env ------------------------------------------------- #
     from rlinf.envs.geniesim import REGISTER_GENIESIM_ENVS
@@ -242,7 +243,7 @@ def main():
 
     # ---- 6. Main loop ------------------------------------------------------- #
     while any(d is not None for d in current_demo):
-        actions = torch.zeros(m, action_dim, dtype=torch.float32)
+        actions = torch.zeros(m, model_action_dim, dtype=torch.float32)
 
         for i in range(m):
             if current_demo[i] is None:

@@ -137,15 +137,27 @@ python examples/embodiment/train_embodied_agent.py \
 algorithm:
   gamma: 0.99          # discount factor
   tau: 0.005           # target network soft update rate
-  target_entropy: -14  # ≈ -action_dim; controls exploration/exploitation
+  target_entropy: -7   # ≈ -action_dim; controls exploration/exploitation
   update_epoch: 8      # update steps per rollout epoch
   critic_actor_ratio: 2
 
   replay_buffer:
-    min_buffer_size: 2  # start training after 2 episodes collected
+    cache_size: 200     # reduced for image observations
+    min_buffer_size: 2  # start training after 2 rollout epochs
 
-  demo_buffer:
-    load_path: null     # set via CLI: ++algorithm.demo_buffer.load_path=...
+actor:
+  model:
+    model_type: cnn_policy   # ResNet10 encoder + MLP head
+    image_size: [3, 128, 128]
+    state_dim: 26            # right arm only
+    action_dim: 7
+    num_q_heads: 10
+  enable_drq: true           # DRQ image augmentation
+
+env:
+  train:
+    total_num_envs: 4
+    max_steps_per_rollout_epoch: 100
 ```
 
 ### Monitoring training
@@ -191,38 +203,19 @@ Videos are saved to `../results/junpu_sac_mlp/video/eval/`.
 
 ## Reward Function
 
-The current reward in `JunpuPlaceWorkpieceEnv.step()` is a **placeholder**:
+The reward in `JunpuPlaceWorkpieceEnv._compute_reward()` is a **dense multi-component reward**:
 
-```python
-# rlinf/envs/geniesim/tasks/junpu_place_workpiece.py
-def _placeholder_reward(self, obs, terminated):
-    # -0.01 per timestep (time pressure)
-    return torch.full((n,), -0.01, dtype=torch.float32)
-```
+| Component | Weight | Description |
+|-----------|--------|-------------|
+| xy distance | −5.0 × ‖wp_xy − target_xy‖ | Penalize horizontal deviation |
+| z distance (asymmetric) | −10.0 below / −5.0 above target | Penalize dropping harder |
+| orientation | −2.0 × angle_diff | Keep workpiece upright |
+| stillness bonus | +0.5 | When velocity < 0.02 m/s |
+| success bonus | +5.0 | All criteria met for 15 consecutive steps (0.5s) |
 
-**To replace it**, edit `rlinf/envs/geniesim/tasks/junpu_place_workpiece.py`:
+Target position: 5cm below initial workpiece position. Success requires xy < 2cm, z < 1cm, angle < 0.15 rad, velocity < 0.02 m/s for 15 steps.
 
-```python
-def _placeholder_reward(self, obs, terminated):
-    states = obs["states"]   # [B, 40]
-    # State layout:
-    #   [0:7]   arm_l joint positions
-    #   [7:14]  arm_r joint positions
-    #   [14:21] arm_l joint velocities
-    #   [21:28] arm_r joint velocities
-    #   [28:31] left  EE position  (x, y, z)  in base_link frame
-    #   [31:34] left  EE euler XYZ
-    #   [34:37] right EE position  (x, y, z)  in base_link frame
-    #   [37:40] right EE euler XYZ
-    ee_r_pos = states[:, 34:37]  # right end-effector position
-
-    # Example: distance to a target position (meters)
-    target = torch.tensor([0.55, -0.12, 1.05], device=states.device)
-    dist = torch.norm(ee_r_pos - target, dim=-1)
-    reward = -dist                    # dense distance reward
-    reward += 1.0 * terminated.float().squeeze(-1)  # +1 on success
-    return reward
-```
+Workpiece position is obtained from `infos["body_poses"]["workpiece_r"]` (ground truth from sim via SHM).
 
 ---
 
@@ -233,15 +226,13 @@ def _placeholder_reward(self, obs, terminated):
 ```yaml
 init_params:
   id: junpu_place_workpiece
-  state_dim: 40         # 28 joint (pos+vel) + 12 EE (pos+rpy × 2)
+  state_dim: 52         # 26 right-arm (joint pos+vel + EE) + 26 left-arm (unused, reserved)
   action_dim: 14        # [pos_l(3), rpy_l(3), pos_r(3), rpy_r(3), grip_l, grip_r]
   control_mode: ee      # EE-space; IK solved in MuJoCo
-  ee_body_l: gripper_l_base_link
-  ee_body_r: gripper_r_base_link
-  gripper_ctrl_l: 52
-  gripper_ctrl_r: 53
-  physics_hz: 1000
-  render_hz: 30.0
+  cam_width: 480
+  cam_height: 480
+  wrist_cam_prim: /robot/Right_Camera   # right wrist camera for CNN policy
+  total_num_envs: 4     # parallel simulation instances
 ```
 
 **`examples/embodiment/config/env/geniesim_junpu_place_workpiece.yaml`**  

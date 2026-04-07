@@ -60,6 +60,13 @@ class EmbodiedSACFSDPPolicy(EmbodiedFSDPActor):
         self.update_step = 0
         self.enable_drq = bool(getattr(self.cfg.actor, "enable_drq", False))
 
+        traj_dump_cfg = self.cfg.algorithm.get("traj_dump", None)
+        self._traj_dump_enabled = traj_dump_cfg is not None and traj_dump_cfg.get("enabled", False)
+        self._traj_dump_interval = traj_dump_cfg.get("interval", 10) if traj_dump_cfg else 10
+        self._traj_dump_include_images = traj_dump_cfg.get("include_images", False) if traj_dump_cfg else False
+        self._traj_dump_counter = 0
+        self._traj_dump_path = ""
+
     def init_worker(self):
         self.setup_model_and_optimizer(initialize_target=True)
         self.setup_sac_components()
@@ -236,6 +243,14 @@ class EmbodiedSACFSDPPolicy(EmbodiedFSDPActor):
         )
         self.buffer_dataloader_iter = iter(self.buffer_dataloader)
 
+        if self._traj_dump_enabled:
+            self._traj_dump_path = os.path.join(
+                self.cfg.runner.logger.log_path,
+                self.cfg.runner.logger.experiment_name,
+                f"traj_dump/rank_{self._rank}",
+            )
+            os.makedirs(self._traj_dump_path, exist_ok=True)
+
         self.critic_actor_ratio = self.cfg.algorithm.get("critic_actor_ratio", 1)
         self.critic_subsample_size = self.cfg.algorithm.get("critic_subsample_size", -1)
         self.critic_sample_generator = torch.Generator(self.device)
@@ -328,6 +343,11 @@ class EmbodiedSACFSDPPolicy(EmbodiedFSDPActor):
 
         self.replay_buffer.add_trajectories(recv_list)
 
+        if self._traj_dump_enabled:
+            self._traj_dump_counter += 1
+            if self._traj_dump_counter % self._traj_dump_interval == 0:
+                self._dump_trajectories(recv_list)
+
         if self.demo_buffer is not None:
             intervene_traj_list = []
             for traj in recv_list:
@@ -338,6 +358,43 @@ class EmbodiedSACFSDPPolicy(EmbodiedFSDPActor):
 
             if len(intervene_traj_list) > 0:
                 self.demo_buffer.add_trajectories(intervene_traj_list)
+
+    def _dump_trajectories(self, trajectories: list[Trajectory]):
+        try:
+            for i, traj in enumerate(trajectories):
+                dump = {}
+                if traj.actions is not None:
+                    dump["actions"] = traj.actions.clone()
+                if traj.rewards is not None:
+                    dump["rewards"] = traj.rewards.clone()
+                if traj.dones is not None:
+                    dump["dones"] = traj.dones.clone()
+                if traj.terminations is not None:
+                    dump["terminations"] = traj.terminations.clone()
+                if traj.truncations is not None:
+                    dump["truncations"] = traj.truncations.clone()
+                if traj.intervene_flags is not None:
+                    dump["intervene_flags"] = traj.intervene_flags.clone()
+
+                if traj.curr_obs:
+                    dump["curr_obs"] = {}
+                    for k, v in traj.curr_obs.items():
+                        if k == "main_images" and not self._traj_dump_include_images:
+                            continue
+                        if isinstance(v, torch.Tensor):
+                            dump["curr_obs"][k] = v.clone()
+                if traj.next_obs:
+                    dump["next_obs"] = {}
+                    for k, v in traj.next_obs.items():
+                        if k == "main_images" and not self._traj_dump_include_images:
+                            continue
+                        if isinstance(v, torch.Tensor):
+                            dump["next_obs"][k] = v.clone()
+
+                fname = f"step_{self._traj_dump_counter:06d}_traj_{i}.pt"
+                torch.save(dump, os.path.join(self._traj_dump_path, fname))
+        except Exception as e:
+            self.logger.warning(f"Failed to dump trajectory: {e}")
 
     @Worker.timer("forward_critic")
     def forward_critic(self, batch):
@@ -487,7 +544,7 @@ class EmbodiedSACFSDPPolicy(EmbodiedFSDPActor):
         )
         if log_pi.ndim == 1:
             log_pi = log_pi.unsqueeze(-1)
-        log_pi = log_pi.sum(dim=-1, keepdim=True)  # sum over the chunk dimension
+        log_pi = log_pi.sum(dim=-1, keepdim=True)
         if not use_crossq:
             dsrl_kwargs = {"train": True} if self.use_dsrl else {}
             all_qf_pi = self.model(
@@ -518,6 +575,20 @@ class EmbodiedSACFSDPPolicy(EmbodiedFSDPActor):
             qf_pi = torch.mean(all_qf_pi, dim=1, keepdim=True)
         metrics["q_pi"] = qf_pi.mean().item()
         actor_loss = ((self.entropy_temp.alpha * log_pi) - qf_pi).mean()
+
+        bc_coef = self.cfg.algorithm.get("bc_coef", 0.0)
+        if bc_coef > 0.0 and "is_demo" in batch:
+            is_demo = batch["is_demo"].to(self.device)
+            if is_demo.any():
+                demo_actions = batch["actions"][is_demo].to(self.device)
+                demo_pi = pi[is_demo]
+                if demo_pi.ndim > demo_actions.ndim:
+                    demo_actions = demo_actions.unsqueeze(1)
+                elif demo_actions.ndim > demo_pi.ndim:
+                    demo_pi = demo_pi.unsqueeze(1)
+                bc_loss = F.mse_loss(demo_pi, demo_actions)
+                actor_loss = actor_loss + bc_coef * bc_loss
+                metrics["bc_loss"] = bc_loss.item()
 
         entropy = -log_pi.mean()
         return actor_loss, entropy, metrics
@@ -558,7 +629,6 @@ class EmbodiedSACFSDPPolicy(EmbodiedFSDPActor):
             global_batch_size_per_rank // self.cfg.actor.micro_batch_size,
         )
 
-        # move train_micro_batch_list to device and apply DRQ for critic/actor/alpha passes
         for i, batch in enumerate(train_micro_batch_list):
             batch = put_tensor_device(batch, device=self.device)
             if self.enable_drq:
@@ -649,7 +719,6 @@ class EmbodiedSACFSDPPolicy(EmbodiedFSDPActor):
                     **all_actor_metrics,
                 }
             )
-        # Soft update target network
         if (
             self.target_model_initialized
             and self.update_step % self.cfg.algorithm.get("target_update_freq", 1) == 0
@@ -702,7 +771,6 @@ class EmbodiedSACFSDPPolicy(EmbodiedFSDPActor):
             self.load_param_and_grad(self.device)
             self.load_optimizer(self.device)
 
-        # Check if replay buffer has enough samples
         min_buffer_size = self.cfg.algorithm.replay_buffer.get("min_buffer_size", 100)
         if not self.replay_buffer.is_ready(min_buffer_size):
             self.log_on_first_rank(
@@ -710,7 +778,6 @@ class EmbodiedSACFSDPPolicy(EmbodiedFSDPActor):
             )
             return {}
 
-        # Delay actor training until buffer has enough samples
         train_actor_steps = self.cfg.algorithm.get("train_actor_steps", 0)
         train_actor_steps = max(min_buffer_size, train_actor_steps)
         train_actor = self.replay_buffer.is_ready(train_actor_steps)

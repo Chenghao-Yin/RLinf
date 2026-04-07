@@ -44,11 +44,11 @@
 
 | 概念 | 对应内容 |
 |------|---------|
-| **状态（obs）** | 40 维向量：14 维关节角度 + 14 维关节速度 + 12 维末端位置/姿态 |
-| **动作（action）** | 14 维向量：左右手末端目标位置+姿态各 6 维，夹爪各 1 维 |
-| **奖励（reward）** | 每步 −0.01（时间惩罚），成功放置后可给正奖励（当前为占位实现） |
-| **回合（episode）** | 一次完整尝试，最多 300 步（约 5 分钟仿真时间） |
-| **策略（policy）** | 一个 MLP 神经网络，输入状态，输出动作 |
+| **状态（obs）** | 26 维向量（右臂）：7 关节角度 + 7 关节速度 + 6 EE 位置/姿态 + 6 EE 速度；外加 128×128×3 右手腕部相机 RGB 图像 |
+| **动作（action）** | 7 维向量：右手末端目标位置(3) + 姿态(3) + 夹爪(1) |
+| **奖励（reward）** | 密集奖励：xy 距离惩罚 + 非对称 z 惩罚 + 姿态偏差惩罚 + 静止奖励 + 成功奖励 |
+| **回合（episode）** | 一次完整尝试，最多 300 步（约 10 秒仿真时间，30Hz 控制频率） |
+| **策略（policy）** | CNN（ResNet10 图像编码器）+ MLP 头，输入图像+状态，输出动作 |
 
 ### 1.3 什么是"示范数据"？
 
@@ -129,19 +129,25 @@ env:
 algorithm:
   gamma: 0.99          # 未来奖励折扣
   tau: 0.005           # 目标网络软更新速率（每步小幅同步）
-  target_entropy: -14  # 目标熵值 = -action_dim，控制探索程度
+  target_entropy: -7   # 目标熵值 = -action_dim，控制探索程度
   update_epoch: 8      # 每轮更新 8 次 Critic+Actor
   critic_actor_ratio: 2 # 每更新 1 次 Actor，先更新 2 次 Critic
 
   replay_buffer:
-    cache_size: 5000    # 记忆库最多存 5000 条轨迹
-
-  demo_buffer:
-    cache_size: 50      # 示范数据库最多存 50 条轨迹
+    cache_size: 200     # 记忆库最多存 200 条轨迹（图像数据较大）
 
 env:
   train:
-    max_steps_per_rollout_epoch: 4  # 每轮只收集 4 步（非常短！）
+    total_num_envs: 4                    # 4 个并行仿真环境
+    max_steps_per_rollout_epoch: 100     # 每轮收集 100 步/环境
+
+actor:
+  model:
+    model_type: cnn_policy               # CNN 策略（ResNet10 + MLP）
+    image_size: [3, 128, 128]            # 右手腕部相机 128×128 RGB
+    state_dim: 26                        # 右臂状态
+    action_dim: 7                        # 右臂动作
+  enable_drq: true                       # DRQ 图像数据增强
 ```
 
 ---
@@ -152,7 +158,7 @@ env:
 |------|-----|-----|
 | **类型** | On-policy（只用当前策略的新数据） | Off-policy（可以复用历史数据） |
 | **需要示范数据** | 否 | 可选（有数据时强烈推荐） |
-| **每轮收集步数** | 300 步（整回合） | 4 步（极短） |
+| **每轮收集步数** | 300 步（整回合） | 100 步 × 4 环境 = 400 转移 |
 | **数据复用** | 不复用（每批数据用完即丢） | 大量复用（回放缓冲区） |
 | **探索机制** | ε-greedy 式随机动作 + 温度采样 | 熵正则化（自动维持探索） |
 | **适合阶段** | 任何阶段（尤其是没有示范数据时） | 有示范数据时效率更高 |
@@ -291,11 +297,11 @@ EMBODIED_PATH=$(pwd)/examples/embodiment \
 训练开始后，每隔几秒会打印一次指标面板。看到以下输出说明一切正常：
 
 ```
-[GenieSimShmClient] Initialised | num_envs=1 state_dim=40 action_dim=14
-demo_buffer/num_trajectories=30   ← 示范数据已加载（仅有示范数据时）
-sac/critic_loss=0.xxx             ← Critic 正在训练
-sac/actor_loss=0.xxx              ← Actor 正在训练
+[GenieSimShmClient] Initialised | num_envs=4 state_dim=52 action_dim=14
+sac/critic_loss=x.xxx             ← Critic 正在训练
+sac/actor_loss=x.xxx              ← Actor 正在训练
 sac/alpha=0.01                    ← 熵系数（自动调节）
+actor/q_value_0=-x.xxx            ← Q 值估计（10 个 Q-head）
 ```
 
 ### SAC 训练内部流程
@@ -304,21 +310,21 @@ sac/alpha=0.01                    ← 熵系数（自动调节）
 
 ```
 [Epoch N]
-  ① 环境交互（4 步）
-       机器人执行 4 个动作 → 收集 4 条 (s, a, r, s') 转移
+  ① 环境交互（100 步 × 4 并行环境 = 400 转移）
+       机器人执行动作 → 收集 (s, a, r, s') 转移
        存入回放缓冲区（在线数据）
-  ②  采样训练批次
-       50% 来自回放缓冲区（机器人自己的经验）
-       50% 来自示范缓冲区（人类示范）
-  ③ Critic 更新（2 次）
-       用贝尔曼方程计算目标 Q 值
+  ② 采样训练批次（从回放缓冲区随机采样 128 个样本）
+  ③ Critic 更新（8 次中每次都更新）
+       用贝尔曼方程计算目标 Q 值（10 个 Q-head，取最小值）
        最小化 Q 值预测误差（均方误差）
-  ④ Actor 更新（1 次）
+  ④ Actor 更新（每 2 次 Critic 更新后更新 1 次）
        最大化期望 Q 值 + 熵
   ⑤ Alpha（温度）更新
-       自动调节，使策略熵接近目标值（-14）
+       自动调节，使策略熵接近目标值（-7）
   ⑥ 目标网络软更新
        τ=0.005，缓慢向主网络靠拢（稳定训练）
+  ⑦ DRQ 图像增强
+       训练时对图像应用随机裁剪（pad=4），提高视觉泛化
   [每 100 Epoch] Eval：完整跑 300 步，记录成功率
 ```
 
@@ -382,11 +388,10 @@ tensorboard --logdir /home/zy/code/rlinf_open_source/results
 | `sac/critic_loss` | Critic 预测误差 | 快速下降后稳定在低值 |
 | `sac/actor_loss` | Actor 优化目标（负 Q 值） | 通常为负数，逐渐变小（更负） |
 | `sac/alpha` | 熵温度系数 | 自动调整，通常在 0.01~0.1 稳定 |
-| `actor/q_value_0/1` | Q 值估计 | 随训练应逐渐增大 |
+| `actor/q_value_0..9` | Q 值估计（10 个 Q-head） | 随训练应逐渐反映真实回报 |
 | `actor/q_pi` | 策略期望 Q 值 | 应接近 `q_value` |
 | `actor/entropy` | 策略熵 | 维持在合理范围，过低说明过度收敛 |
 | `replay_buffer/total_samples` | 回放缓冲区样本数 | 持续增加 |
-| `demo_buffer/num_trajectories` | 示范数据条数 | 固定值（如 30），不变 |
 
 #### PPO 指标
 
@@ -420,113 +425,33 @@ tensorboard --logdir /home/zy/code/rlinf_open_source/results
 
 ---
 
-## 8. 自定义 Reward 函数
+## 8. Reward 函数设计
 
-当前 reward 是占位实现（每步 -0.01），需要你根据任务设计真实的奖励信号。
+当前 reward 已实现为密集奖励函数，位于 `JunpuPlaceWorkpieceEnv._compute_reward()`。
 
-### 8.1 修改位置
+### 8.1 当前 Reward 设计
+
+任务目标：将工件放置在初始位置下方 5cm 处，保持竖直姿态，静止 0.5 秒。
+
+| 奖励分量 | 公式 | 权重 |
+|---------|------|------|
+| **xy 距离惩罚** | −‖wp_xy − target_xy‖ | ×5.0 |
+| **z 距离惩罚（非对称）** | 低于目标 ×10.0，高于目标 ×5.0 | — |
+| **姿态偏差惩罚** | −angle_diff（与竖直方向夹角） | ×2.0 |
+| **静止奖励** | 工件速度 < 0.02 m/s 时 | +0.5 |
+| **成功奖励** | 所有条件满足并持续 15 步（0.5 秒） | +5.0 |
+
+成功判定条件（同时满足 15 个连续步）：
+- xy 偏差 < 2cm
+- z 偏差 < 1cm
+- 姿态偏差 < 0.15 rad
+- 速度 < 0.02 m/s
+
+### 8.2 修改位置
 
 编辑文件：`RLinf/rlinf/envs/geniesim/tasks/junpu_place_workpiece.py`
 
-```python
-def _placeholder_reward(self, obs, terminated) -> torch.Tensor:
-    """
-    在这里实现你的奖励函数。
-    
-    参数：
-        obs["states"]: torch.Tensor [N, 40]
-            状态向量，布局如下：
-            [0:7]   左臂关节位置（弧度）
-            [7:14]  右臂关节位置（弧度）
-            [14:21] 左臂关节速度（弧度/秒）
-            [21:28] 右臂关节速度（弧度/秒）
-            [28:31] 左末端 EE 位置（base_link 系，米）
-            [31:34] 左末端 EE 姿态（RPY，弧度）
-            [34:37] 右末端 EE 位置（base_link 系，米）
-            [37:40] 右末端 EE 姿态（RPY，弧度）
-        terminated: torch.Tensor [N] bool
-            当前步是否因成功而结束
-    
-    返回：
-        torch.Tensor [N] float32，每个并行环境的奖励
-    """
-    n = terminated.shape[0]
-    
-    # 当前占位：每步 -0.01（时间压力，鼓励快速完成）
-    return torch.full((n,), -0.01, dtype=torch.float32)
-```
-
-### 8.2 推荐的奖励设计思路
-
-**情形 A：知道目标位置（最简单）**
-
-如果你知道工件的目标放置位置（例如通过仿真工具测量），可以用末端执行器到目标的距离：
-
-```python
-def _placeholder_reward(self, obs, terminated) -> torch.Tensor:
-    states = obs["states"]   # [N, 40]
-    n = terminated.shape[0]
-    
-    # 右末端 EE 当前位置
-    ee_r_pos = states[:, 34:37]  # [N, 3]
-    
-    # 目标位置（用仿真工具测量得到）
-    target = torch.tensor([0.55, -0.12, 1.05],
-                          dtype=torch.float32, device=states.device)
-    
-    # 距离奖励（距离越近，奖励越高）
-    dist = torch.norm(ee_r_pos - target, dim=-1)  # [N]
-    reward = -dist * 0.1                           # 缩放到合适范围
-    
-    # 时间惩罚（鼓励快速完成）
-    reward -= 0.005
-    
-    # 成功稀疏奖励
-    reward += terminated.float() * 10.0
-    
-    return reward
-```
-
-**情形 B：无法直接获取目标位置（依靠 ADER 系统）**
-
-启用 ADER 评测系统，从 `infos["task_progress"]` 读取子步骤进度：
-
-```python
-def step(self, actions, auto_reset=True):
-    obs, raw_rewards, terminated, truncated, infos = super().step(
-        actions, auto_reset=auto_reset
-    )
-    rewards = self._compute_reward(raw_rewards, terminated, infos)
-    return obs, rewards, terminated, truncated, infos
-
-def _compute_reward(self, raw_rewards, terminated, infos):
-    n = terminated.shape[0]
-    rewards = torch.full((n,), -0.005, dtype=torch.float32)  # 时间惩罚
-    
-    # 从 ADER 子步骤进度中提取 dense 奖励
-    task_progress = infos.get("task_progress", [[] for _ in range(n)])
-    for i, prog_list in enumerate(task_progress):
-        for sub_step in prog_list:
-            score = float(sub_step.get("score", 0.0))
-            rewards[i] += 0.1 * score   # 每个子步骤最多 +0.1
-    
-    # 成功稀疏奖励（ADER 会在 terminated=True 时给出）
-    rewards += raw_rewards.to(dtype=torch.float32) * 10.0
-    
-    return rewards
-```
-
-> **注意**：使用情形 B 需要在 env 配置中设置 `enable_reward: true` 并提供 `task_file` 路径。
-
-### 8.3 奖励设计的一般原则
-
-| 原则 | 说明 |
-|------|------|
-| **密集 > 稀疏** | 尽量每步都有反馈，不要只在成功时才给奖励 |
-| **量级适中** | 奖励值建议在 [-1, +1] 范围内，过大的值会导致训练不稳定 |
-| **时间惩罚** | 加入每步的小负奖励（-0.005 ~ -0.01），鼓励快速完成 |
-| **成功加分** | 成功完成时给一个较大的正奖励（+5 ~ +10） |
-| **阶段奖励** | 分解任务（接近工件 → 抓取 → 移动 → 放置），每阶段完成给奖励 |
+工件位置通过 `infos["body_poses"]` 中的 `workpiece_r` 获取世界坐标（由 sim 侧通过 SHM 传递）。
 
 ---
 
@@ -687,13 +612,14 @@ ls /tmp/junpu_demo_buffer/
 |------|--------|------|---------|
 | `algorithm.gamma` | 0.99 | 未来奖励折扣 | 通常不需要改 |
 | `algorithm.tau` | 0.005 | 目标网络更新速率 | 更大 → 学习更快但不稳定 |
-| `algorithm.target_entropy` | -14 | 目标熵（=-action_dim） | 更大（如 -10）→ 更多探索 |
+| `algorithm.target_entropy` | -7 | 目标熵（=-action_dim） | 更大（如 -5）→ 更多探索 |
 | `algorithm.update_epoch` | 8 | 每轮更新次数 | 更多 → 更新更充分，但更慢 |
 | `algorithm.critic_actor_ratio` | 2 | Critic/Actor 更新比 | 通常不需要改 |
 | `actor.optim.lr` | 3e-4 | Actor 学习率 | 不稳定时减小到 1e-4 |
 | `actor.critic_optim.lr` | 3e-4 | Critic 学习率 | 同上 |
-| `env.train.max_steps_per_rollout_epoch` | 4 | 每轮收集步数 | 更多 → 单轮数据更多 |
-| `algorithm.replay_buffer.cache_size` | 5000 | 在线缓冲区大小 | 内存允许时可增大 |
+| `env.train.max_steps_per_rollout_epoch` | 100 | 每轮收集步数/环境 | 与 total_num_envs 一起决定总数据量 |
+| `env.train.total_num_envs` | 4 | 并行仿真环境数 | 更多 → 数据收集更快，但内存增加 |
+| `algorithm.replay_buffer.cache_size` | 200 | 在线缓冲区大小 | 图像策略时不宜太大（内存限制） |
 
 ### PPO 核心超参数
 

@@ -15,38 +15,23 @@
 # GenieSimEnv — RLinf gymnasium.Env wrapper for the GeneSim lightweight RL
 # pipeline (MuJoCo physics + IsaacSim rendering, no Cosine / mc-in-loop).
 #
-# Usage in RLinf config (omegaconf):
-#
-#   env_type: geniesim
-#   env_cfg:
-#     init_params:
-#       id: place_block_into_box
-#       task_description: "Pick up the red block and place it in the box."
-#       mjcf_path: /path/to/scene.xml
-#       scene_usd: /path/to/scene.usd
-#       robot_usd: /path/to/robot.usda
-#       num_envs: 4
-#     max_episode_steps: 300
-#     auto_reset: true
-#     ignore_terminations: false
-#     use_rel_reward: false
-#     reward_coef: 1.0
-#     seed: 42
-#     video_cfg: {}
-#
+# The sim-side GenieSimVectorEnv organises obs, reward, terminated, truncated,
+# info.  This wrapper converts numpy results to torch, tracks local metrics
+# for RLinf's logging infrastructure, and allows subclasses to override the
+# reward computation (e.g. JunpuPlaceWorkpieceEnv computes dense reward from
+# info["body_poses"]).
 
 from __future__ import annotations
 
 import copy
 import os
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, Optional, Tuple
 
 import numpy as np
 import torch
 import gymnasium as gym
-from omegaconf import open_dict
 
-from rlinf.envs.geniesim import REGISTER_GENIESIM_ENVS
+from rlinf.envs.geniesim import REGISTER_GENIESIM_ENVS  # noqa: F401
 from rlinf.envs.geniesim.container_manager import SimContainerManager
 from rlinf.envs.geniesim.process_manager import SimProcessManager
 from rlinf.envs.geniesim.sim_manager_base import BaseSimManager
@@ -62,8 +47,9 @@ class GenieSimBaseEnv(gym.Env):
         _make_vec_env_config()  -> GenieSimVectorEnvConfig
         _wrap_obs(obs_dict)     -> obs_dict in RLinf canonical format
 
-    The actual simulation runs in GenieSimVectorEnv (main repo), which this
-    class owns and delegates to.
+    The actual simulation runs in GenieSimVectorEnv (sim side), which manages
+    MuJoCo + IsaacSim lifecycle and organises obs/reward/terminated/truncated/info.
+    This class delegates to GenieSimShmClient for SHM-based communication.
     """
 
     metadata = {"render_modes": []}
@@ -96,21 +82,6 @@ class GenieSimBaseEnv(gym.Env):
         self.success_once = np.zeros(num_envs, dtype=bool)
         self.fail_once = np.zeros(num_envs, dtype=bool)
 
-        # ---- Simulation backend lifecycle ----
-        # Three modes are supported (container_cfg.mode):
-        #   'auto' (default) — auto-detect: if GENIESIM_CONTAINER env var is set
-        #                      (i.e. running inside a GenieSim container), use
-        #                      'local'; otherwise use 'docker'.
-        #   'docker'         — simulation runs in a Docker container managed by
-        #                      SimContainerManager.
-        #   'local'          — simulation runs as a direct subprocess managed by
-        #                      SimProcessManager.  Use this when training and
-        #                      sim_server.py share the same environment (e.g. the
-        #                      merged geniesim-rlinf-train container).
-        #
-        # In both modes, host↔sim communication goes through POSIX shared memory
-        # (ctrl SHM for states/actions/resets; frame SHM for images).
-        # ROS is NOT needed on the host side.
         container_cfg = cfg.container_cfg
         _mode = str(getattr(container_cfg, "mode", "auto"))
         if _mode == "auto":
@@ -124,7 +95,6 @@ class GenieSimBaseEnv(gym.Env):
 
         pm_kwargs = BaseSimManager.pm_kwargs_from_vec_cfg(vec_cfg)
         self._container_mgr.ensure_running(pm_kwargs)
-        # GenieSimShmClient connects to the running container via SHM only.
         vec_cfg.attach_to_running = True
         self.env = GenieSimShmClient(vec_cfg)
 
@@ -133,10 +103,6 @@ class GenieSimBaseEnv(gym.Env):
     # ---------------------------------------------------------------------- #
 
     def _make_vec_env_config(self):
-        """
-        Return a GenieSimVectorEnvConfig built from self.cfg.
-        Subclasses can override for task-specific customisation.
-        """
         import json as _json
         _rand_cfg = getattr(self.cfg, "randomization", None)
         _object_map = getattr(self.cfg, "object_map", None)
@@ -146,19 +112,16 @@ class GenieSimBaseEnv(gym.Env):
                 from omegaconf import OmegaConf
                 _rand_dict = OmegaConf.to_container(_rand_cfg, resolve=True) if _rand_cfg is not None else {}
                 if _object_map is not None:
-                    # Embed object_map as _object_map so mujoco_ros_node can resolve aliases.
                     _rand_dict["_object_map"] = OmegaConf.to_container(_object_map, resolve=True)
                 _rand_json = _json.dumps(_rand_dict)
             except Exception:
                 pass
-        # init_qpos: optional list of floats in YAML → JSON string for mujoco node
-        # Overlaid onto data.qpos[:len] at every reset before randomization.
         _init_qpos = getattr(self.cfg.init_params, "init_qpos", None)
         _init_qpos_json = _json.dumps([float(v) for v in _init_qpos]) if _init_qpos is not None else ""
-        # reset_ee_r: optional [x,y,z,roll,pitch,yaw] list in YAML → JSON string for mujoco node
         _reset_ee_r = getattr(self.cfg.init_params, "reset_ee_r", None)
         _reset_ee_r_json = _json.dumps(list(_reset_ee_r)) if _reset_ee_r is not None else ""
         p = self.cfg.init_params
+        resolved_cameras = self._resolve_cameras(p)
         return GenieSimVectorEnvConfig(
             mjcf_path=getattr(p, "mjcf_path", ""),
             scene_usd=getattr(p, "scene_usd", ""),
@@ -172,8 +135,9 @@ class GenieSimBaseEnv(gym.Env):
             task_instance_id=getattr(p, "task_instance_id", 0),
             num_envs=self.num_envs,
             max_episode_steps=self.cfg.max_episode_steps,
-            cam_width=getattr(p, "cam_width", 640),
-            cam_height=getattr(p, "cam_height", 480),
+            cameras=resolved_cameras,
+            cam_width=resolved_cameras[0].get("width", 640) if resolved_cameras else getattr(p, "cam_width", 640),
+            cam_height=resolved_cameras[0].get("height", 480) if resolved_cameras else getattr(p, "cam_height", 480),
             main_cam_prim=getattr(p, "main_cam_prim", "/camera_main"),
             wrist_cam_prim=getattr(p, "wrist_cam_prim", ""),
             enable_reward=getattr(self.cfg, "enable_reward", True),
@@ -206,28 +170,70 @@ class GenieSimBaseEnv(gym.Env):
             info_body_names=list(getattr(p, "info_body_names", []) or []),
         )
 
-    def _wrap_obs(self, obs_dict: Dict) -> Dict:
-        """
-        Convert GenieSimVectorEnv obs dict to RLinf canonical format.
-        Default implementation converts numpy arrays to torch tensors (CPU).
-        Override in subclasses if a different mapping is needed.
-        """
-        main_images = obs_dict["main_images"]          # [N, H, W, 3] uint8
-        wrist_images = obs_dict.get("wrist_images")    # [N, H, W, 3] uint8 or None
-        states = obs_dict["states"]                     # [N, state_dim] float32
-        task_descriptions = obs_dict["task_descriptions"]
+    @staticmethod
+    def _resolve_cameras(params) -> list:
+        raw = getattr(params, "cameras", None)
+        if raw is not None:
+            try:
+                from omegaconf import OmegaConf
+                return [dict(c) for c in OmegaConf.to_container(raw, resolve=True)]
+            except Exception:
+                return list(raw)
+        cams = []
+        main_prim = getattr(params, "main_cam_prim", "")
+        w = getattr(params, "cam_width", 640)
+        h = getattr(params, "cam_height", 480)
+        if main_prim:
+            cams.append({"name": "main", "prim": main_prim, "width": w, "height": h})
+        wrist_prim = getattr(params, "wrist_cam_prim", "")
+        if wrist_prim:
+            cams.append({"name": "wrist", "prim": wrist_prim, "width": w, "height": h})
+        return cams or [{"name": "main", "prim": "/camera_main", "width": 640, "height": 480}]
 
-        result = {
-            "main_images": torch.from_numpy(main_images),
+    def _wrap_obs(self, obs_dict: Dict) -> Dict:
+        states = obs_dict["states"]
+        task_descriptions = obs_dict["task_descriptions"]
+        states = self._extract_states(states)
+
+        result: Dict = {
             "states": torch.from_numpy(states),
             "task_descriptions": task_descriptions,
         }
-        if wrist_images is not None:
-            result["wrist_images"] = torch.from_numpy(wrist_images)
-        else:
-            result["wrist_images"] = None
 
+        cameras = getattr(self.env.cfg, "cameras", None) or []
+        if cameras:
+            first_key = f"{cameras[0]['name']}_images"
+            img = obs_dict.get(first_key)
+            if img is not None:
+                result["main_images"] = torch.from_numpy(img)
+            else:
+                result["main_images"] = None
+            extras = []
+            for cam_cfg in cameras[1:]:
+                key = f"{cam_cfg['name']}_images"
+                img = obs_dict.get(key)
+                if img is not None:
+                    extras.append(torch.from_numpy(img))
+            if extras:
+                result["extra_view_images"] = torch.stack(extras, dim=1)
+        else:
+            main_images = obs_dict.get("main_images")
+            if main_images is not None:
+                result["main_images"] = torch.from_numpy(main_images)
+            else:
+                result["main_images"] = None
+
+        result = self._extract_images(result)
         return result
+
+    def _extract_images(self, obs_dict: Dict) -> Dict:
+        return obs_dict
+
+    def _extract_states(self, states: np.ndarray) -> np.ndarray:
+        return states
+
+    def _expand_actions(self, actions: np.ndarray) -> np.ndarray:
+        return actions
 
     # ---------------------------------------------------------------------- #
     # gym.Env interface
@@ -237,9 +243,10 @@ class GenieSimBaseEnv(gym.Env):
         self,
         seed: Optional[int] = None,
         env_ids: Optional[np.ndarray] = None,
+        **kwargs,
     ) -> Tuple[Dict, Dict]:
         env_idx = env_ids.tolist() if env_ids is not None else None
-        raw_obs, _ = self.env.reset(env_idx=env_idx)
+        raw_obs, raw_infos = self.env.reset(env_idx=env_idx)
         obs = self._wrap_obs(raw_obs)
         self._reset_metrics(env_idx)
         return obs, {}
@@ -248,26 +255,57 @@ class GenieSimBaseEnv(gym.Env):
         self,
         actions,
         auto_reset: bool = True,
-    ) -> Tuple[Dict, np.ndarray, np.ndarray, np.ndarray, Dict]:
+    ) -> Tuple[Dict, torch.Tensor, torch.Tensor, torch.Tensor, Dict]:
+        """Execute one environment step.
+
+        Subclass reward-computation pitfall
+        ------------------------------------
+        When ``auto_reset=True`` (the default), :meth:`_handle_auto_reset`
+        replaces ``obs`` and ``infos`` with the *post-reset* values **before**
+        this method returns.  Any reward computed from those values will reflect
+        the initial state of the *next* episode, not the terminal state of the
+        current one — producing systematically inflated rewards for termination
+        transitions and causing the critic to over-estimate their Q-value.
+
+        Subclasses that compute task-specific rewards have two safe options:
+
+        1. **Override** :meth:`_compute_task_reward` (preferred for simple tasks).
+           It is called here with the terminal ``obs``/``infos``, before any reset
+           is performed.
+
+        2. **Call** ``super().step(..., auto_reset=False)`` and perform the reset
+           manually after computing rewards (used by ``JunpuPlaceWorkpieceEnv``
+           which also needs custom termination logic in its ``step()``).
+        """
         if isinstance(actions, torch.Tensor):
             actions_np = actions.cpu().numpy()
         else:
             actions_np = np.asarray(actions, dtype=np.float32)
+        if actions_np.ndim == 1:
+            actions_np = actions_np.reshape(1, -1)
+
+        actions_np = self._expand_actions(actions_np)
 
         raw_obs, rewards, terminated, truncated, infos = self.env.step(
-            actions_np, auto_reset=False  # auto_reset handled below
+            actions_np,
         )
-
-        self._elapsed_steps += 1
-        truncated = truncated | (self._elapsed_steps >= self.cfg.max_episode_steps)
-        dones = terminated | truncated
 
         obs = self._wrap_obs(raw_obs)
 
-        rewards_t = torch.from_numpy(rewards)
+        rewards_t = torch.from_numpy(rewards.astype(np.float32))
         terminated_t = torch.from_numpy(terminated)
         truncated_t = torch.from_numpy(truncated)
+        dones = terminated | truncated
 
+        # Hook: subclasses may override reward computation here, while obs/infos
+        # still reflect the terminal state (before any auto-reset takes place).
+        task_rewards = self._compute_task_reward(
+            obs, infos, rewards_t, terminated_t, truncated_t
+        )
+        if task_rewards is not None:
+            rewards_t = task_rewards
+
+        self._elapsed_steps += 1
         infos = self._record_metrics(rewards_t, terminated_t, infos)
 
         if self.ignore_terminations:
@@ -276,28 +314,40 @@ class GenieSimBaseEnv(gym.Env):
 
         _do_auto_reset = auto_reset and self.auto_reset
         if dones.any() and _do_auto_reset:
-            obs, infos = self._handle_auto_reset(torch.from_numpy(dones), obs, infos)
+            obs, infos = self._handle_auto_reset(
+                torch.from_numpy(dones), obs, infos
+            )
 
         return obs, rewards_t, terminated_t, truncated_t, infos
 
-    def chunk_step(self, chunk_actions) -> Tuple:
-        """Execute a sequence of actions (chunk) across all envs.
+    def _compute_task_reward(
+        self,
+        obs: Dict,
+        infos: Dict,
+        sim_rewards: torch.Tensor,
+        terminated: torch.Tensor,
+        truncated: torch.Tensor,
+    ):
+        """Hook for task-specific reward computation from the terminal state.
 
-        Implemented by looping over action chunks and calling ``step()`` for
-        each one.  This ensures that:
-        * per-step reward overrides defined in subclasses (e.g.
-          ``JunpuPlaceWorkpieceEnv``) are applied correctly;
-        * episode metrics and auto-reset are handled by the existing
-          ``step()`` logic;
-        * returned tensors have shape ``[num_envs, num_action_chunks]``
-          as expected by ``env_worker.py`` (``chunk_dones[:, -1]``).
+        Called **before** auto-reset, so ``obs`` and ``infos`` still contain
+        the state at the end of the current step (terminal or not).
+
+        Return a ``torch.Tensor`` of shape ``(num_envs,)`` to replace the
+        simulator's raw reward, or ``None`` to keep it unchanged.
+
+        Subclasses that need custom termination logic in addition to custom
+        rewards should instead call ``super().step(..., auto_reset=False)`` and
+        handle the reset manually (see :meth:`step` docstring).
         """
+        return None
+
+    def chunk_step(self, chunk_actions) -> Tuple:
         if not isinstance(chunk_actions, torch.Tensor):
             chunk_actions = torch.as_tensor(
                 np.asarray(chunk_actions, dtype=np.float32)
             )
 
-        # Normalise to [num_envs, num_action_chunks, action_dim]
         if chunk_actions.ndim == 2:
             chunk_actions = chunk_actions.unsqueeze(1)
 
@@ -310,7 +360,7 @@ class GenieSimBaseEnv(gym.Env):
         infos_list: list = []
 
         for i in range(num_action_chunks):
-            act = chunk_actions[:, i, :]  # [num_envs, action_dim]
+            act = chunk_actions[:, i, :]
             obs, rewards, terminated, truncated, infos = self.step(
                 act, auto_reset=self.auto_reset
             )
@@ -320,7 +370,6 @@ class GenieSimBaseEnv(gym.Env):
             truncated_list.append(truncated)
             infos_list.append(infos)
 
-        # Stack: [num_envs, num_action_chunks]
         chunk_rewards_t = torch.stack(rewards_list, dim=1)
         chunk_terminations_t = torch.stack(terminated_list, dim=1)
         chunk_truncations_t = torch.stack(truncated_list, dim=1)
@@ -332,7 +381,7 @@ class GenieSimBaseEnv(gym.Env):
         self._container_mgr.shutdown()
 
     # ---------------------------------------------------------------------- #
-    # Metrics helpers (mirrors IsaaclabBaseEnv)
+    # Metrics helpers
     # ---------------------------------------------------------------------- #
 
     def _init_metrics(self):
@@ -355,7 +404,9 @@ class GenieSimBaseEnv(gym.Env):
             self.returns[:] = 0.0
             self._elapsed_steps[:] = 0
 
-    def _record_metrics(self, step_reward: torch.Tensor, terminations: torch.Tensor, infos: Dict) -> Dict:
+    def _record_metrics(
+        self, step_reward: torch.Tensor, terminations: torch.Tensor, infos: Dict
+    ) -> Dict:
         self.returns += step_reward.numpy()
         self.success_once |= (step_reward.numpy() > 0)
         episode_info = {
@@ -363,8 +414,11 @@ class GenieSimBaseEnv(gym.Env):
             "return": torch.from_numpy(self.returns.copy()),
             "episode_len": torch.from_numpy(self._elapsed_steps.copy()),
             "reward": torch.from_numpy(
-                np.where(self._elapsed_steps > 0, self.returns / np.maximum(self._elapsed_steps, 1), 0.0)
-                .astype(np.float32)
+                np.where(
+                    self._elapsed_steps > 0,
+                    self.returns / np.maximum(self._elapsed_steps, 1),
+                    0.0,
+                ).astype(np.float32)
             ),
         }
         infos["episode"] = episode_info
@@ -401,5 +455,4 @@ class GenieSimBaseEnv(gym.Env):
         return torch.from_numpy(self._elapsed_steps.copy())
 
     def update_reset_state_ids(self):
-        """No multi-task support in the lightweight pipeline."""
         pass

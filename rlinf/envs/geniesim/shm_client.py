@@ -8,12 +8,14 @@
 #
 # GenieSimShmClient — RLinf-native client for the GeneSim simulation container.
 #
-# Replaces GenieSimVectorEnv (from the geniesim Python package) with a
-# stdlib-only implementation that connects to the container via shared memory.
+# Thin client that communicates with the sim-side GenieSimVectorEnv via SHM:
+#   Frame SHM  — camera images (read-only, written by Isaac Sim renderer)
+#   Ctrl SHM   — per-env states (read-only, written by MuJoCo node)
+#   Step SHM   — request-reply channel for step/reset (shared with GenieSimVectorEnv)
 #
-# All communication with the simulation happens through two SHM segments per env:
-#   Frame SHM  — camera images written by Isaac Sim renderer
-#   Ctrl SHM   — states/actions/reset flags written by MuJoCo node
+# The sim-side GenieSimVectorEnv is responsible for organising obs, reward,
+# terminated, truncated, info.  This client simply writes actions and reads
+# the pre-organised results.
 #
 # NO geniesim, rclpy, or ROS dependencies are required on the host.
 
@@ -31,13 +33,20 @@ from rlinf.envs.geniesim.shm_layout import (
     BODY_POSE_DIM,
     CTRL_HEADER_BYTES,
     NUM_CAMS,
-    RESET_DONE,
-    RESET_IDLE,
-    RESET_REQUESTED,
     SHM_HEADER_BYTES,
+    STEP_HEADER_BYTES,
+    STEP_OUTPUT_SCALARS,
+    STEP_PHASE_IDLE,
+    STEP_PHASE_RESET_DONE,
+    STEP_PHASE_RESET_REQUEST,
+    STEP_PHASE_STEP_DONE,
+    STEP_PHASE_STEP_REQUEST,
+    STEP_PHASE_CLOSE,
     ctrl_shm_name,
     ctrl_total_bytes,
     shm_total_bytes,
+    step_shm_name,
+    step_total_bytes,
 )
 
 
@@ -47,12 +56,6 @@ from rlinf.envs.geniesim.shm_layout import (
 
 @dataclass
 class GenieSimVectorEnvConfig:
-    """Configuration for GenieSimShmClient (or the legacy GenieSimVectorEnv).
-
-    All fields match geniesim.rl.envs.geniesim_vec_env.GenieSimVectorEnvConfig
-    so that SimContainerManager.pm_kwargs_from_vec_cfg() works unchanged.
-    """
-    # Task / assets
     mjcf_path: str = ""
     scene_usd: str = ""
     robot_usd: str = ""
@@ -64,10 +67,8 @@ class GenieSimVectorEnvConfig:
     robot_type: str = "G2"
     task_instance_id: int = 0
 
-    # Parallel environments
     num_envs: int = 1
 
-    # Episode
     max_episode_steps: int = 300
     enable_reward: bool = False
     reward_coef: float = 1.0
@@ -75,17 +76,18 @@ class GenieSimVectorEnvConfig:
     ignore_terminations: bool = False
     auto_reset: bool = True
 
-    # Camera
+    cameras: List[Dict[str, Any]] = field(default_factory=lambda: [
+        {"name": "main", "prim": "/camera_main", "width": 640, "height": 480},
+    ])
+
     cam_width: int = 640
     cam_height: int = 480
     main_cam_prim: str = "/camera_main"
     wrist_cam_prim: str = ""
 
-    # SHM
     shm_name: str = "geniesim_frames"
     shm_open_timeout_sec: int = 180
 
-    # Sim
     physics_hz: float = 1000.0
     render_hz: float = 30.0
     headless: bool = True
@@ -93,7 +95,6 @@ class GenieSimVectorEnvConfig:
     isaac_python: str = "/isaac-sim/python.sh"
     mujoco_python: str = ""
 
-    # Robot state / control
     state_dim: int = 28
     action_dim: int = 14
     state_joint_offset: int = 0
@@ -107,16 +108,16 @@ class GenieSimVectorEnvConfig:
     ik_max_iter: int = 10
     ik_damp: float = 0.05
 
-    # Randomisation / init
     randomization_cfg_json: str = ""
     init_qpos_json: str = ""
     reset_ee_r_json: str = ""
     seed: int = 42
 
-    # Ground-truth info: body names whose world-frame poses are passed via SHM
     info_body_names: List[str] = field(default_factory=list)
 
-    # Container mode
+    sync_mode: bool = True
+    steps_per_step: int = 33
+
     attach_to_running: bool = False
 
 
@@ -126,16 +127,20 @@ class GenieSimVectorEnvConfig:
 
 class GenieSimShmClient:
     """
-    Lightweight environment client that talks to a running GeneSim container
+    Lightweight environment client that talks to the sim-side GenieSimVectorEnv
     exclusively via shared memory.
 
-    This class reimplements the attach-mode subset of GenieSimVectorEnv
-    without any dependency on the geniesim Python package, rclpy, or ROS.
+    Communication protocol:
+      1. Client writes actions into step SHM and sets STEP_PHASE_STEP_REQUEST.
+      2. GenieSimVectorEnv (sim side) reads actions, runs physics, organises
+         obs/reward/terminated/truncated/info, writes results to step SHM, and
+         sets STEP_PHASE_STEP_DONE.
+      3. Client reads results from step SHM and frame SHM (images).
 
-    Interface (matches GenieSimVectorEnv)::
+    Interface::
 
-        reset(env_idx=None) -> (obs_dict, {})
-        step(actions, auto_reset=False) -> (obs, rewards, terminated, truncated, infos)
+        reset(env_idx=None) -> (obs_dict, info_dict)
+        step(actions)       -> (obs, rewards, terminated, truncated, infos)
         close()
     """
 
@@ -143,26 +148,40 @@ class GenieSimShmClient:
         self.cfg = cfg
         self.num_envs = cfg.num_envs
 
-        self._elapsed_steps = np.zeros(cfg.num_envs, dtype=np.int32)
-        self._episode_returns = np.zeros(cfg.num_envs, dtype=np.float32)
-        self._success_once = np.zeros(cfg.num_envs, dtype=bool)
+        self._cameras = list(cfg.cameras) if cfg.cameras else []
+        if not self._cameras and cfg.main_cam_prim:
+            self._cameras = [{"name": "main", "prim": cfg.main_cam_prim,
+                              "width": cfg.cam_width, "height": cfg.cam_height}]
+            if cfg.wrist_cam_prim:
+                self._cameras.append({"name": "wrist", "prim": cfg.wrist_cam_prim,
+                                      "width": cfg.cam_width, "height": cfg.cam_height})
+        self._num_cams = len(self._cameras)
+        self._cam_h = self._cameras[0]["height"] if self._cameras else cfg.cam_height
+        self._cam_w = self._cameras[0]["width"] if self._cameras else cfg.cam_width
 
-        # Frame SHM (camera images, written by Isaac Sim)
+        self._info_body_names: List[str] = list(cfg.info_body_names or [])
+        self._info_dim = len(self._info_body_names) * BODY_POSE_DIM
+
         self._shm: Optional[shared_memory.SharedMemory] = None
         self._frames: Optional[np.ndarray] = None
         self._frame_counter: Optional[np.ndarray] = None
-        self._open_shm(max_attempts=cfg.shm_open_timeout_sec)
+        self._open_frame_shm(max_attempts=cfg.shm_open_timeout_sec)
 
-        # Ctrl SHMs (states / actions / reset / info, one per env)
         self._ctrl_shms: List[shared_memory.SharedMemory] = []
-        self._ctrl_counters: List[np.ndarray] = []
-        self._ctrl_reset_flags: List[np.ndarray] = []
         self._ctrl_states_bufs: List[np.ndarray] = []
-        self._ctrl_actions_bufs: List[np.ndarray] = []
-        self._ctrl_info_bufs: List[Optional[np.ndarray]] = []
-        self._info_body_names: List[str] = list(cfg.info_body_names)
-        self._info_dim = len(self._info_body_names) * BODY_POSE_DIM
         self._open_ctrl_shms(max_attempts=cfg.shm_open_timeout_sec)
+
+        self._step_shm: Optional[shared_memory.SharedMemory] = None
+        self._step_phase: Optional[np.ndarray] = None
+        self._step_actions: Optional[np.ndarray] = None
+        self._step_rewards: Optional[np.ndarray] = None
+        self._step_terminated: Optional[np.ndarray] = None
+        self._step_truncated: Optional[np.ndarray] = None
+        self._step_elapsed: Optional[np.ndarray] = None
+        self._step_returns: Optional[np.ndarray] = None
+        self._step_success: Optional[np.ndarray] = None
+        self._step_info_poses: Optional[np.ndarray] = None
+        self._open_step_shm(max_attempts=cfg.shm_open_timeout_sec)
 
         print(
             f"[GenieSimShmClient] Initialised | num_envs={self.num_envs} "
@@ -174,17 +193,17 @@ class GenieSimShmClient:
     # SHM attachment
     # ---------------------------------------------------------------------- #
 
-    def _open_shm(self, max_attempts: int = 180):
-        h, w = self.cfg.cam_height, self.cfg.cam_width
-        shm_bytes = shm_total_bytes(self.num_envs, h, w)
+    def _open_frame_shm(self, max_attempts: int = 180):
+        h, w = self._cam_h, self._cam_w
+        shm_bytes = shm_total_bytes(self.num_envs, h, w, num_cams=self._num_cams)
         for _ in range(max_attempts):
             try:
                 self._shm = shared_memory.SharedMemory(
                     name=self.cfg.shm_name, create=False, size=shm_bytes
                 )
-                # SHM is owned by the container process.  Unregister from
-                # Python's resource tracker to suppress PermissionError on exit.
-                _resource_tracker.unregister(f"/{self.cfg.shm_name}", "shared_memory")
+                _resource_tracker.unregister(
+                    f"/{self.cfg.shm_name}", "shared_memory"
+                )
                 break
             except FileNotFoundError:
                 time.sleep(1.0)
@@ -195,7 +214,7 @@ class GenieSimShmClient:
             )
 
         self._frames = np.ndarray(
-            (self.num_envs, NUM_CAMS, h, w, 3),
+            (self.num_envs, self._num_cams, h, w, 3),
             dtype=np.uint8,
             buffer=self._shm.buf,
             offset=SHM_HEADER_BYTES,
@@ -205,15 +224,17 @@ class GenieSimShmClient:
         )
 
     def _open_ctrl_shms(self, max_attempts: int = 180):
-        _S = self.cfg.state_dim * 4
-        _A = self.cfg.action_dim * 4
-        _total = ctrl_total_bytes(self.cfg.state_dim, self.cfg.action_dim, self._info_dim)
+        _total = ctrl_total_bytes(
+            self.cfg.state_dim, self.cfg.action_dim, self._info_dim
+        )
         for i in range(self.num_envs):
             name = ctrl_shm_name(self.cfg.shm_name, i)
             shm = None
             for _ in range(max_attempts):
                 try:
-                    shm = shared_memory.SharedMemory(name=name, create=False, size=_total)
+                    shm = shared_memory.SharedMemory(
+                        name=name, create=False, size=_total
+                    )
                     break
                 except FileNotFoundError:
                     time.sleep(1.0)
@@ -224,121 +245,148 @@ class GenieSimShmClient:
                 )
             _resource_tracker.unregister(f"/{name}", "shared_memory")
             self._ctrl_shms.append(shm)
-            self._ctrl_counters.append(
-                np.ndarray((1,), dtype=np.uint32, buffer=shm.buf, offset=0)
-            )
-            self._ctrl_reset_flags.append(
-                np.ndarray((1,), dtype=np.uint32, buffer=shm.buf, offset=4)
-            )
             self._ctrl_states_bufs.append(
                 np.ndarray(
                     (self.cfg.state_dim,), dtype=np.float32,
                     buffer=shm.buf, offset=CTRL_HEADER_BYTES,
                 )
             )
-            self._ctrl_actions_bufs.append(
-                np.ndarray(
-                    (self.cfg.action_dim,), dtype=np.float32,
-                    buffer=shm.buf, offset=CTRL_HEADER_BYTES + _S,
-                )
-            )
-            if self._info_dim > 0:
-                self._ctrl_info_bufs.append(
-                    np.ndarray(
-                        (self._info_dim,), dtype=np.float32,
-                        buffer=shm.buf, offset=CTRL_HEADER_BYTES + _S + _A,
-                    )
-                )
-            else:
-                self._ctrl_info_bufs.append(None)
         print(
             f"[GenieSimShmClient] Ctrl SHMs attached | "
-            f"state_dim={self.cfg.state_dim} action_dim={self.cfg.action_dim} "
-            f"info_dim={self._info_dim}"
+            f"state_dim={self.cfg.state_dim} action_dim={self.cfg.action_dim}"
         )
+
+    def _open_step_shm(self, max_attempts: int = 180):
+        N = self.num_envs
+        A = self.cfg.action_dim
+        _total = step_total_bytes(N, A, self._info_dim)
+        name = step_shm_name(self.cfg.shm_name)
+        for _ in range(max_attempts):
+            try:
+                self._step_shm = shared_memory.SharedMemory(
+                    name=name, create=False, size=_total
+                )
+                break
+            except FileNotFoundError:
+                time.sleep(1.0)
+        if self._step_shm is None:
+            raise RuntimeError(
+                f"[GenieSimShmClient] Step SHM '{name}' "
+                f"not available after {max_attempts}s"
+            )
+        _resource_tracker.unregister(f"/{name}", "shared_memory")
+        off = 0
+        self._step_phase = np.ndarray(
+            (1,), dtype=np.uint32, buffer=self._step_shm.buf, offset=off
+        )
+        off += STEP_HEADER_BYTES
+        self._step_reset_mask = np.ndarray(
+            (N,), dtype=np.float32, buffer=self._step_shm.buf, offset=off
+        )
+        off += N * 4
+        self._step_actions = np.ndarray(
+            (N, A), dtype=np.float32, buffer=self._step_shm.buf, offset=off
+        )
+        off += N * A * 4
+        self._step_rewards = np.ndarray(
+            (N,), dtype=np.float32, buffer=self._step_shm.buf, offset=off
+        )
+        off += N * 4
+        self._step_terminated = np.ndarray(
+            (N,), dtype=np.float32, buffer=self._step_shm.buf, offset=off
+        )
+        off += N * 4
+        self._step_truncated = np.ndarray(
+            (N,), dtype=np.float32, buffer=self._step_shm.buf, offset=off
+        )
+        off += N * 4
+        self._step_elapsed = np.ndarray(
+            (N,), dtype=np.float32, buffer=self._step_shm.buf, offset=off
+        )
+        off += N * 4
+        self._step_returns = np.ndarray(
+            (N,), dtype=np.float32, buffer=self._step_shm.buf, offset=off
+        )
+        off += N * 4
+        self._step_success = np.ndarray(
+            (N,), dtype=np.float32, buffer=self._step_shm.buf, offset=off
+        )
+        off += N * 4
+        if self._info_dim > 0:
+            self._step_info_poses = np.ndarray(
+                (N, self._info_dim), dtype=np.float32,
+                buffer=self._step_shm.buf, offset=off,
+            )
+        print(f"[GenieSimShmClient] Step SHM attached: {name}")
 
     # ---------------------------------------------------------------------- #
     # Observation helpers
     # ---------------------------------------------------------------------- #
 
-    def _wait_new_frame(self, timeout: float = 2.0):
-        current = int(self._frame_counter[0])
+    def _get_obs(self) -> Dict[str, Any]:
+        obs: Dict[str, Any] = {}
+        for cam_idx, cam_cfg in enumerate(self._cameras):
+            name = cam_cfg["name"]
+            key = f"{name}_images"
+            obs[key] = np.copy(self._frames[:, cam_idx])
+        if not self._cameras:
+            h, w = self.cfg.cam_height, self.cfg.cam_width
+            obs["main_images"] = np.zeros(
+                (self.num_envs, h, w, 3), dtype=np.uint8
+            )
+        states = np.stack(
+            [np.copy(b) for b in self._ctrl_states_bufs], axis=0
+        )
+        obs["states"] = states
+        obs["task_descriptions"] = [self.cfg.task_description] * self.num_envs
+        return obs
+
+    # ---------------------------------------------------------------------- #
+    # Step SHM request-reply
+    # ---------------------------------------------------------------------- #
+
+    def _wait_step_done(self, timeout: float = 30.0) -> bool:
         deadline = time.time() + timeout
         while time.time() < deadline:
-            if int(self._frame_counter[0]) != current:
-                return
-            time.sleep(0.001)
+            phase = int(self._step_phase[0])
+            if phase == STEP_PHASE_STEP_DONE:
+                self._step_phase[0] = STEP_PHASE_IDLE
+                return True
+            time.sleep(0.0001)
+        print("[GenieSimShmClient] WARNING: step timeout")
+        return False
 
-    def _get_obs(self) -> Dict[str, Any]:
-        self._wait_new_frame()
-        h, w = self.cfg.cam_height, self.cfg.cam_width
-        main_images = np.copy(self._frames[:, 0])       # [N, H, W, 3]
-        wrist_images = (
-            np.copy(self._frames[:, 1]) if self.cfg.wrist_cam_prim else None
-        )
-        states = np.stack([np.copy(b) for b in self._ctrl_states_bufs], axis=0)
-        return {
-            "main_images": main_images,
-            "wrist_images": wrist_images,
-            "states": states,
-            "task_descriptions": [self.cfg.task_description] * self.num_envs,
-        }
-
-    # ---------------------------------------------------------------------- #
-    # Action dispatch
-    # ---------------------------------------------------------------------- #
-
-    def _send_actions(self, actions: np.ndarray):
-        """Write actions into ctrl SHMs.  actions: [N, action_dim]."""
-        for i, buf in enumerate(self._ctrl_actions_bufs):
-            n = min(actions.shape[1], len(buf))
-            np.copyto(buf[:n], actions[i, :n].astype(np.float32))
-
-    # ---------------------------------------------------------------------- #
-    # Reset
-    # ---------------------------------------------------------------------- #
-
-    def _reset_env(self, env_idx: int):
-        flag = self._ctrl_reset_flags[env_idx]
-        flag[0] = RESET_REQUESTED
-        deadline = time.time() + 10.0
+    def _wait_reset_done(self, timeout: float = 30.0) -> bool:
+        deadline = time.time() + timeout
         while time.time() < deadline:
-            if int(flag[0]) == RESET_DONE:
-                flag[0] = RESET_IDLE
-                return
-            time.sleep(0.001)
-        print(f"[GenieSimShmClient] reset timeout for env_{env_idx}")
+            phase = int(self._step_phase[0])
+            if phase == STEP_PHASE_RESET_DONE:
+                self._step_phase[0] = STEP_PHASE_IDLE
+                return True
+            time.sleep(0.0001)
+        print("[GenieSimShmClient] WARNING: reset timeout")
+        return False
 
-    def reset(self, env_idx=None) -> Tuple[Dict, Dict]:
-        if env_idx is None:
-            indices = list(range(self.num_envs))
-        elif isinstance(env_idx, int):
-            indices = [env_idx]
-        else:
-            indices = list(env_idx)
+    def _read_body_poses(self) -> Dict[str, np.ndarray]:
+        if self._info_dim == 0 or self._step_info_poses is None:
+            return {}
+        poses = {}
+        for idx, bname in enumerate(self._info_body_names):
+            off = idx * BODY_POSE_DIM
+            poses[bname] = np.copy(
+                self._step_info_poses[:, off:off + BODY_POSE_DIM]
+            )
+        return poses
 
-        for i in indices:
-            self._reset_env(i)
-            self._elapsed_steps[i] = 0
-            self._episode_returns[i] = 0.0
-            self._success_once[i] = False
-
-        obs = self._get_obs()
-        return obs, {}
-
-    # ---------------------------------------------------------------------- #
-    # Step
-    # ---------------------------------------------------------------------- #
-
-    def _build_infos(self, rewards, terminated, truncated) -> Dict:
+    def _read_step_infos(self) -> Dict:
         infos: Dict = {
             "episode": {
-                "success_once": self._success_once.copy(),
-                "return": self._episode_returns.copy(),
-                "episode_len": self._elapsed_steps.copy(),
+                "success_once": np.copy(self._step_success).astype(bool),
+                "return": np.copy(self._step_returns),
+                "episode_len": np.copy(self._step_elapsed).astype(np.int32),
                 "reward": np.where(
-                    self._elapsed_steps > 0,
-                    self._episode_returns / np.maximum(self._elapsed_steps, 1),
+                    self._step_elapsed > 0,
+                    self._step_returns / np.maximum(self._step_elapsed, 1),
                     0.0,
                 ),
             },
@@ -348,59 +396,43 @@ class GenieSimShmClient:
             infos["body_poses"] = self._read_body_poses()
         return infos
 
-    def _read_body_poses(self) -> Dict[str, np.ndarray]:
-        n = len(self._info_body_names)
-        poses = {}
-        for bname_idx, bname in enumerate(self._info_body_names):
-            arr = np.zeros((self.num_envs, BODY_POSE_DIM), dtype=np.float32)
-            for env_i in range(self.num_envs):
-                buf = self._ctrl_info_bufs[env_i]
-                if buf is not None:
-                    off = bname_idx * BODY_POSE_DIM
-                    arr[env_i] = buf[off:off + BODY_POSE_DIM]
-            poses[bname] = arr
-        return poses
+    # ---------------------------------------------------------------------- #
+    # Reset
+    # ---------------------------------------------------------------------- #
 
-    def _handle_auto_reset(
-        self, dones: np.ndarray, final_obs: Dict, infos: Dict
-    ) -> Tuple[Dict, Dict]:
-        import copy
-        _final_obs = copy.deepcopy(final_obs)
-        _final_info = copy.deepcopy(infos)
-        done_indices = np.where(dones)[0].tolist()
-        obs, _ = self.reset(env_idx=done_indices)
-        infos["final_observation"] = _final_obs
-        infos["final_info"] = _final_info
-        infos["_final_observation"] = dones
-        infos["_final_info"] = dones
+    def reset(self, env_idx=None) -> Tuple[Dict, Dict]:
+        if env_idx is None:
+            self._step_reset_mask[:] = 1.0
+        else:
+            self._step_reset_mask[:] = 0.0
+            if isinstance(env_idx, int):
+                self._step_reset_mask[env_idx] = 1.0
+            else:
+                for i in env_idx:
+                    self._step_reset_mask[i] = 1.0
+        self._step_phase[0] = STEP_PHASE_RESET_REQUEST
+        self._wait_reset_done()
+        obs = self._get_obs()
+        infos = self._read_step_infos()
         return obs, infos
+
+    # ---------------------------------------------------------------------- #
+    # Step
+    # ---------------------------------------------------------------------- #
 
     def step(
         self,
         actions: np.ndarray,
-        auto_reset: bool = True,
     ) -> Tuple[Dict, np.ndarray, np.ndarray, np.ndarray, Dict]:
-        self._send_actions(actions)
+        np.copyto(self._step_actions, actions.astype(np.float32))
+        self._step_phase[0] = STEP_PHASE_STEP_REQUEST
+        self._wait_step_done()
 
-        rewards = np.zeros(self.num_envs, dtype=np.float32)
-        terminated = np.zeros(self.num_envs, dtype=bool)
-
-        self._elapsed_steps += 1
-        truncated = self._elapsed_steps >= self.cfg.max_episode_steps
-        dones = terminated | truncated
-
-        self._episode_returns += rewards
-        self._success_once |= terminated
-
+        rewards = np.copy(self._step_rewards)
+        terminated = np.copy(self._step_terminated).astype(bool)
+        truncated = np.copy(self._step_truncated).astype(bool)
         obs = self._get_obs()
-        infos = self._build_infos(rewards, terminated, truncated)
-
-        if self.cfg.ignore_terminations:
-            infos["episode"]["success_at_end"] = terminated.copy()
-            terminated = np.zeros_like(terminated)
-
-        if dones.any() and auto_reset and self.cfg.auto_reset:
-            obs, infos = self._handle_auto_reset(dones, obs, infos)
+        infos = self._read_step_infos()
 
         return obs, rewards, terminated, truncated, infos
 
@@ -409,6 +441,14 @@ class GenieSimShmClient:
     # ---------------------------------------------------------------------- #
 
     def close(self):
+        if self._step_phase is not None:
+            self._step_phase[0] = STEP_PHASE_CLOSE
+        if self._step_shm is not None:
+            try:
+                self._step_shm.close()
+            except Exception:
+                pass
+            self._step_shm = None
         for shm in self._ctrl_shms:
             try:
                 shm.close()

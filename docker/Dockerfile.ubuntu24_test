@@ -1,0 +1,121 @@
+# Test Dockerfile: RLinf embodied-robotwin on Ubuntu 24.04
+#
+# Purpose: validate that flash-attn and other RLinf deps build successfully on
+# Ubuntu 24.04 (Noble), which is the base OS of the GenieSim image.  If this
+# build succeeds we know merging GenieSim + RLinf is feasible.
+#
+# Build (from RLinf/ directory):
+#   docker build --no-cache \
+#     -f docker/Dockerfile.ubuntu24_test \
+#     -t rlinf-ubuntu24-test:latest \
+#     .
+#
+# Key differences vs the main Dockerfile:
+#   1. Base image: nvidia/cuda:12.6.2-cudnn-devel-ubuntu24.04
+#      (CUDA 12.4.1 has no ubuntu24.04 image; 12.6.2 is the closest)
+#   2. apt sources: Ubuntu 24.04 uses DEB822 format (/etc/apt/sources.list.d/ubuntu.sources)
+#      — mirror sed target updated accordingly.
+#   3. pip bootstrap: Ubuntu 24.04 enforces "externally-managed-environment",
+#      so we add --break-system-packages when installing uv into the system python.
+#   4. runit-systemd: may not exist in Ubuntu 24.04; made optional with || true.
+
+FROM nvidia/cuda:12.6.2-cudnn-devel-ubuntu24.04
+
+SHELL ["/bin/bash", "-c"]
+ENV DEBIAN_FRONTEND=noninteractive
+
+# ---------------------------------------------------------------------------
+# Mirror setup — Ubuntu 24.04 uses DEB822 format; handle both formats.
+# ---------------------------------------------------------------------------
+RUN \
+    # Old-style sources.list (22.04 and earlier, may be empty/absent on 24.04)
+    sed -i 's@//.*archive.ubuntu.com@//mirrors.ustc.edu.cn@g' /etc/apt/sources.list 2>/dev/null || true; \
+    # New-style DEB822 (24.04)
+    if [ -f /etc/apt/sources.list.d/ubuntu.sources ]; then \
+        sed -i \
+            -e 's|http://archive.ubuntu.com|http://mirrors.ustc.edu.cn|g' \
+            -e 's|http://security.ubuntu.com|http://mirrors.ustc.edu.cn|g' \
+            /etc/apt/sources.list.d/ubuntu.sources; \
+    fi
+
+# ---------------------------------------------------------------------------
+# System packages
+# runit-systemd is optional — not critical for training, skip if missing.
+# ---------------------------------------------------------------------------
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git vim libibverbs-dev openssh-server sudo runit tmux \
+    build-essential python3-dev cmake pkg-config iproute2 pciutils python3 python3-pip \
+    wget unzip curl \
+ && apt-get install -y --no-install-recommends runit-systemd 2>/dev/null || true \
+ && rm -rf /var/lib/apt/lists/*
+
+# ---------------------------------------------------------------------------
+# Python / pip / uv setup
+# --break-system-packages needed on Ubuntu 24.04 (externally-managed-environment)
+# ---------------------------------------------------------------------------
+RUN pip config set global.index-url https://mirrors.ustc.edu.cn/pypi/simple
+RUN python3 -m pip install \
+        -i https://mirrors.ustc.edu.cn/pypi/simple \
+        --break-system-packages \
+        --upgrade pip setuptools wheel uv
+
+ENV HF_HOME=/opt/.cache/huggingface
+RUN mkdir -p $HF_HOME
+
+ENV UV_DEFAULT_INDEX="https://mirrors.ustc.edu.cn/pypi/simple"
+ENV UV_PATH=/opt/venv
+RUN mkdir -p $UV_PATH
+WORKDIR $UV_PATH
+
+ENV UV_LINK_MODE=hardlink
+ENV UV_CACHE_DIR=$UV_PATH/.cache
+ENV UV_PYTHON_INSTALL_DIR=${UV_PATH}/.python
+
+# ---------------------------------------------------------------------------
+# switch_env utility (same as main Dockerfile)
+# ---------------------------------------------------------------------------
+RUN cat <<'SWITCHEOF' > /usr/local/bin/switch_env
+#!/bin/bash
+if [ -z "$1" ]; then
+    echo "Usage: switch_env <env_name>"
+    exit 1
+fi
+if [ ! -d "/opt/venv/$1" ]; then
+    echo "Environment $1 does not exist in /opt/venv."
+    exit 1
+fi
+source /opt/venv/$1/bin/activate
+SWITCHEOF
+RUN chmod +x /usr/local/bin/switch_env
+
+# ---------------------------------------------------------------------------
+# Embodied NVIDIA_DRIVER_CAPABILITIES
+# ---------------------------------------------------------------------------
+ENV NVIDIA_DRIVER_CAPABILITIES="all"
+
+# ---------------------------------------------------------------------------
+# Project requirements (same COPY as main Dockerfile)
+# ---------------------------------------------------------------------------
+COPY ./pyproject.toml $UV_PATH/pyproject.toml
+COPY ./requirements $UV_PATH/requirements
+
+# ---------------------------------------------------------------------------
+# Install robotwin env (openvla-oft only — faster test; includes flash-attn)
+# This is the critical step: if flash-attn builds here, Ubuntu 24.04 is viable.
+# ---------------------------------------------------------------------------
+RUN bash requirements/install.sh embodied \
+        --venv openvla-oft \
+        --model openvla-oft \
+        --env robotwin \
+        --install-rlinf
+
+# ---------------------------------------------------------------------------
+# Cleanup & defaults
+# ---------------------------------------------------------------------------
+RUN uv cache prune
+RUN rm -rf /var/lib/apt/lists/*
+
+RUN echo "source /opt/venv/openvla-oft/bin/activate" >> ~/.bashrc
+
+WORKDIR /workspace
+CMD ["/bin/bash"]

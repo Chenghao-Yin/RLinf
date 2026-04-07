@@ -1,0 +1,159 @@
+# Dockerfile.geniesim — GenieSim × RLinf merged training image
+#
+# Merges the GenieSim sim-server stack (Isaac Sim 5.1 + ROS 2 Jazzy + MuJoCo)
+# with the full RLinf embodied training stack (torch, flash-attn, ray, etc.).
+#
+# Base: geniesim-rlinf:latest (Ubuntu 24.04, built from dockerfile_geniesim_rlinf)
+#   - Isaac Sim 5.1 at /isaac-sim  (Python 3.11.13, torch 2.7.0+cu128)
+#   - ROS 2 Jazzy at /opt/ros/jazzy
+#   - MuJoCo runtime + /geniesim/rlinf_env (Python 3.12 minimal venv)
+#   - Entrypoint: /entrypoint_geniesim_rlinf.sh
+#
+# This layer adds:
+#   - uv package manager (bootstrap via pip --break-system-packages)
+#   - Python 3.11 venv at /opt/rlinf_venv with full RLinf training deps
+#     (torch is NOT re-installed; flash-attn uses pre-built cu12+torch2.7 wheel)
+#   - RLinf source available at /workspace/RLinf (bind-mount at runtime)
+#
+# Build (from rlinf_open_source/RLinf/ directory):
+#   docker build \
+#     -f docker/Dockerfile.geniesim \
+#     -t geniesim-rlinf-train:latest \
+#     .
+#
+# Run — Mode 1 (host training + container sim, classic):
+#   docker run --rm -it --gpus all --ipc=host \
+#     -v $(pwd):/workspace/repo \
+#     -e GENIESIM_ROOT=/workspace/repo \
+#     -e SIM_REPO_ROOT=/workspace/repo/main \
+#     geniesim-rlinf-train:latest bash
+#
+# Run — Mode 2 (everything inside the container):
+#   docker run --rm -it --gpus all --ipc=host \
+#     -v $(pwd):/geniesim/main:rw \
+#     -v $(pwd)/main:/geniesim/main/main:rw \
+#     geniesim-rlinf-train:latest \
+#     run_local.sh python examples/embodiment/collect_sim_data.py \
+#       --config examples/embodiment/config/env/geniesim_junpu_place_workpiece.yaml \
+#       --save-dir /tmp/demos --num-demos 5 --fake-spacemouse
+#
+# Or interactively (most common Mode 2 workflow):
+#   docker run --rm -it --gpus all --ipc=host \
+#     -v $(pwd):/geniesim/main:rw \
+#     -v $(pwd)/main:/geniesim/main/main:rw \
+#     geniesim-rlinf-train:latest bash
+#   # then inside the container:
+#   run_local.sh   # drops into bash with full env set up
+
+FROM geniesim-rlinf:latest
+
+USER root
+ENV DEBIAN_FRONTEND=noninteractive
+ENV GENIESIM_CONTAINER=1
+
+# ---------------------------------------------------------------------------
+# Mirror setup for apt (Ubuntu 24.04 DEB822 format)
+# ---------------------------------------------------------------------------
+RUN sed -i 's@//.*archive.ubuntu.com@//mirrors.ustc.edu.cn@g' /etc/apt/sources.list 2>/dev/null || true && \
+    if [ -f /etc/apt/sources.list.d/ubuntu.sources ]; then \
+        sed -i \
+            -e 's|http://archive.ubuntu.com|http://mirrors.ustc.edu.cn|g' \
+            -e 's|http://security.ubuntu.com|http://mirrors.ustc.edu.cn|g' \
+            /etc/apt/sources.list.d/ubuntu.sources; \
+    fi
+
+# ---------------------------------------------------------------------------
+# System deps needed for RLinf (libibverbs already present, add build tools)
+# ---------------------------------------------------------------------------
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git \
+    build-essential \
+    cmake \
+    pkg-config \
+    curl \
+    wget \
+    tmux \
+    libhidapi-hidraw0 \
+ && rm -rf /var/lib/apt/lists/*
+
+# ---------------------------------------------------------------------------
+# Install uv (Python 3.12 system; --break-system-packages required on 24.04)
+# ---------------------------------------------------------------------------
+RUN pip3 install \
+        --break-system-packages \
+        -i https://mirrors.ustc.edu.cn/pypi/simple \
+        uv
+
+# ---------------------------------------------------------------------------
+# RLinf venv setup using uv
+#
+# Strategy: create a Python 3.11 venv, then install RLinf training deps.
+# We do NOT install torch from scratch — we install flash-attn via the
+# pre-built wheel for cu12+torch2.7+cp311 and then install torch to match.
+# ---------------------------------------------------------------------------
+ENV UV_DEFAULT_INDEX="https://mirrors.ustc.edu.cn/pypi/simple"
+ENV UV_PATH=/opt/rlinf_venv
+ENV UV_LINK_MODE=hardlink
+ENV UV_CACHE_DIR=/opt/rlinf_venv/.cache
+ENV UV_PYTHON_INSTALL_DIR=/opt/rlinf_venv/.python
+
+RUN mkdir -p $UV_PATH
+WORKDIR $UV_PATH
+
+# Copy only what install.sh needs (not the full repo)
+COPY ./pyproject.toml $UV_PATH/pyproject.toml
+COPY ./requirements $UV_PATH/requirements
+COPY ./docker/run_local.sh /usr/local/bin/run_local.sh
+RUN chmod +x /usr/local/bin/run_local.sh
+
+# ---------------------------------------------------------------------------
+# Install RLinf embodied training deps (no specific sim env, core stack only)
+#
+# We install the base "reason" stack (torch + transformers + ray etc.) plus
+# the robotwin env as a proxy for the full embodied stack.  If flash-attn
+# wheel for torch2.7+cu12+cp311 exists it downloads; otherwise falls back
+# to source (may fail without nvcc — see note below).
+#
+# Note on nvcc: The geniesim base image has CUDA runtime but NOT the
+# compiler (nvcc).  Pre-built flash-attn wheels for cu12+torch2.7+cp311
+# are available from Dao-AILab/flash-attention; if those match our config
+# the build succeeds without nvcc.  If we ever need source compilation,
+# add 'cuda-nvcc-12-8' via nvidia's apt repo.
+# ---------------------------------------------------------------------------
+RUN bash requirements/install.sh embodied \
+        --venv rlinf \
+        --model openvla-oft \
+        --env geniesim \
+        --install-rlinf \
+        --use-mirror
+
+# ---------------------------------------------------------------------------
+# switch_env utility (same as main Dockerfile)
+# ---------------------------------------------------------------------------
+RUN cat <<'SWITCHEOF' > /usr/local/bin/switch_env
+#!/bin/bash
+if [ -z "$1" ]; then echo "Usage: switch_env <env_name>"; exit 1; fi
+if [ ! -d "/opt/rlinf_venv/$1" ]; then echo "Environment $1 does not exist."; exit 1; fi
+source /opt/rlinf_venv/$1/bin/activate
+SWITCHEOF
+RUN chmod +x /usr/local/bin/switch_env
+
+# ---------------------------------------------------------------------------
+# ~/.bashrc for interactive shells
+# ---------------------------------------------------------------------------
+RUN cat >> /root/.bashrc <<'BASHRC'
+# RLinf training venv
+source /opt/rlinf_venv/rlinf/bin/activate
+export PYTHONPATH=/workspace/repo/RLinf:${PYTHONPATH:-}
+BASHRC
+
+# ---------------------------------------------------------------------------
+# Cleanup
+# ---------------------------------------------------------------------------
+RUN uv cache prune && rm -rf /var/lib/apt/lists/*
+
+# ---------------------------------------------------------------------------
+# Keep the original GenieSim entrypoint — it sets up ROS + geniesim Python
+# The training code can be started separately inside the container.
+# ---------------------------------------------------------------------------
+WORKDIR /workspace

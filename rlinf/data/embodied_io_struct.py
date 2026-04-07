@@ -481,7 +481,7 @@ class Trajectory:
                     max_episode_length=self.max_episode_length,
                     model_weights_id=self.model_weights_id,
                     actions=actions,
-                    intervene_flags=intervene_flags,
+                    intervene_flags=None,
                     rewards=rewards,
                     terminations=terminations,
                     truncations=truncations,

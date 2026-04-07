@@ -275,7 +275,22 @@ class CollectEpisode(gym.Wrapper):
 
             buf = self._buffers[env_idx]
             buf["observations"].append(env_obs)
-            buf["actions"].append(self._slice_copy(action, env_idx))
+
+            # When SpacemouseSimIntervention is active for env_idx==0 it writes
+            # the actual EEF target into info["intervene_action"].  The caller
+            # (e.g. collect_sim_data.py) passes all-zero policy actions, so we
+            # must substitute the expert action here so the pickle stores the
+            # correct command that was actually sent to the simulator.
+            if (
+                env_idx == 0
+                and isinstance(info, dict)
+                and "intervene_action" in info
+                and "intervene_flag" in info
+            ):
+                buf["actions"].append(self._copy(info["intervene_action"]))
+            else:
+                buf["actions"].append(self._slice_copy(action, env_idx))
+
             buf["rewards"].append(self._slice_copy(reward, env_idx))
             buf["terminated"].append(self._slice_copy(terminated, env_idx))
             buf["truncated"].append(self._slice_copy(truncated, env_idx))

@@ -16,7 +16,7 @@
 defaults:
   - env/geniesim_junpu_place_workpiece@env.train
   - env/geniesim_junpu_place_workpiece@env.eval
-  - model/mlp_policy@actor.model
+  - model/cnn_policy@actor.model
   - training_backend/fsdp@actor.fsdp_config
   - override hydra/job_logging: stdout
 
@@ -37,7 +37,7 @@ runner:
   logger:
     log_path: "../results"
     project_name: rlinf
-    experiment_name: "junpu_sac_mlp"
+    experiment_name: "junpu_sac_cnn"
     logger_backends: ["tensorboard"]  # add "wandb" or "swanlab" as needed
 
   max_epochs: 5000
@@ -68,7 +68,7 @@ algorithm:
   gamma: 0.99               # discount factor
   tau: 0.005                # soft target update rate
 
-  target_entropy: -14       # -action_dim (=-14) is a safe default
+  target_entropy: -7       # -action_dim (=-7)
   entropy_tuning:
     alpha_type: softplus     # automatic entropy tuning
     initial_alpha: 0.01
@@ -80,8 +80,8 @@ algorithm:
   # Online replay buffer
   replay_buffer:
     enable_cache: true
-    cache_size: 5000          # trajectories kept in memory
-    sample_window_size: 5000  # sample from most recent N trajectories
+    cache_size: 200            # trajectories kept in memory (reduced for image obs)
+    sample_window_size: 200   # sample from most recent N trajectories
     min_buffer_size: 2        # start training after 2 trajectories
     auto_save: false
 
@@ -90,14 +90,15 @@ algorithm:
   # When present, 50% of each training batch is drawn from this buffer.
   demo_buffer:
     enable_cache: true
-    cache_size: 50            # all 10 demos fit in memory
+    cache_size: 50
     sample_window_size: 50
-    min_buffer_size: 1        # start mixing demos as soon as 1 trajectory loaded
+    min_buffer_size: 1
     auto_save: false
-    load_path: null           # set to /path/to/demo_buffer or pass via CLI
+    load_path: ${oc.env:GENIESIM_ROOT}/sac_demo_buffer
 
   target_update_freq: 1
   target_update_type: all
+  bc_coef: 1.0
 
   sampling_params:
     do_sample: true
@@ -108,7 +109,7 @@ algorithm:
     repetition_penalty: 1.0
 
   length_params:
-    max_new_token: 14
+    max_new_token: 7
     max_length: 1024
     min_length: 1
 
@@ -116,9 +117,9 @@ env:
   group_name: "EnvGroup"
 
   train:
-    total_num_envs: 1         # one simulation container
+    total_num_envs: 8          # parallel simulation environments
     group_size: 1             # required by validator (SAC uses 1)
-    max_steps_per_rollout_epoch: 4   # steps collected before each training update
+    max_steps_per_rollout_epoch: 100   # steps collected before each training update
     max_episode_steps: 300
     auto_reset: true
     ignore_terminations: false
@@ -130,9 +131,9 @@ env:
       video_base_dir: ${runner.logger.log_path}/video/train
 
   eval:
-    total_num_envs: 1
+    total_num_envs: 4
     group_size: 1             # required by validator
-    max_steps_per_rollout_epoch: 300  # full episode for eval
+    max_steps_per_rollout_epoch: 100  # steps for eval
     max_episode_steps: 300
     auto_reset: true
     ignore_terminations: false
@@ -152,7 +153,7 @@ rollout:
   collect_prev_infos: false
 
   model:
-    model_path: ""
+    model_path: "${oc.env:EMBODIED_PATH}/config"
     precision: ${actor.model.precision}
 
   enable_torch_compile: false
@@ -162,26 +163,32 @@ actor:
   group_name: "ActorGroup"
   training_backend: "fsdp"
 
-  micro_batch_size: 256
-  global_batch_size: 256
+  micro_batch_size: 128
+  global_batch_size: 128
   seed: 1234
   enable_offload: false
-  enable_drq: false         # data augmentation; enable if using image obs
+  enable_drq: true            # DRQ image augmentation for visual RL
 
   model:
-    model_type: mlp_policy
-    model_path: ""
-    policy_setup: "g2-ee"    # EE-space control; no pre-trained model needed
-    obs_dim: 40              # state_dim = 28 joint + 12 EE
-    action_dim: 14           # [pos_l(3), rpy_l(3), pos_r(3), rpy_r(3), grip_l, grip_r]
+    model_type: cnn_policy
+    model_path: "${oc.env:EMBODIED_PATH}/config"
+    policy_setup: "g2-ee"
+    image_size: [3, 128, 128]
+    image_num: 1
+    state_dim: 26              # right-arm only: 7 joint_pos + 7 joint_vel + 12 EE (pose + velocity)
+    action_dim: 7              # [pos_r(3), rpy_r(3), grip_r(1)]
     num_action_chunks: 1
     hidden_dim: 256
     precision: "32"
-    add_value_head: false    # SAC uses Q-heads, not value head
+    add_value_head: false
     add_q_head: true
-    num_q_heads: 2
+    q_head_type: default
+    num_q_heads: 10
+    backbone: resnet
     is_lora: false
     lora_rank: 32
+    encoder_config:
+      ckpt_name: "resnet10_pretrained.pt"
 
   optim:
     clip_grad: 10.0
@@ -196,7 +203,7 @@ actor:
   fsdp_config:
     strategy: "fsdp"
     sharding_strategy: "no_shard"
-    use_orig_params: false
+    use_orig_params: true
     mixed_precision:
       param_dtype: ${actor.model.precision}
       reduce_dtype: ${actor.model.precision}

@@ -255,7 +255,6 @@ def prepare_actions(
             model_type=model_type,
         )
     elif env_type == SupportedEnvType.GENIESIM:
-        # GeneSim actions are already in the correct format; pass through directly.
         chunk_actions = raw_chunk_actions
     else:
         raise NotImplementedError

@@ -234,6 +234,23 @@ class BaseSimManager(ABC):
                     f"owned by uid {owner_uid} — run `sudo rm /dev/shm/{entry.name}`"
                 )
 
+    def _cleanup_stale_step_shm(self, shm_name: str) -> None:
+        """Remove a stale step SHM segment."""
+        from rlinf.envs.geniesim.shm_layout import step_shm_name
+        name = step_shm_name(shm_name)
+        shm_path = Path("/dev/shm") / name
+        if not shm_path.exists():
+            return
+        try:
+            shm_path.unlink()
+            print(f"[SimManager] Removed stale step SHM '{name}'")
+        except PermissionError:
+            owner_uid = shm_path.stat().st_uid
+            print(
+                f"[SimManager] WARNING: stale step SHM '{name}' owned by uid "
+                f"{owner_uid} — run `sudo rm /dev/shm/{name}`"
+            )
+
     # ---------------------------------------------------------------------- #
     # Shared: config serialisation
     # ---------------------------------------------------------------------- #
@@ -269,6 +286,7 @@ class BaseSimManager(ABC):
             "cam_height":         vec_cfg.cam_height,
             "main_cam_prim":      vec_cfg.main_cam_prim,
             "wrist_cam_prim":     vec_cfg.wrist_cam_prim,
+            "cameras_json":       json.dumps(getattr(vec_cfg, "cameras", []) or []),
             "headless":           vec_cfg.headless,
             "ros_domain_id":      vec_cfg.ros_domain_id,
             "isaac_python":       vec_cfg.isaac_python,
@@ -293,6 +311,14 @@ class BaseSimManager(ABC):
             "reset_ee_r_json":    getattr(vec_cfg, "reset_ee_r_json", ""),
             "seed":               getattr(vec_cfg, "seed", 42),
             "info_body_names":    getattr(vec_cfg, "info_body_names", []),
+            "sync_mode":          getattr(vec_cfg, "sync_mode", True),
+            "steps_per_step":     getattr(vec_cfg, "steps_per_step", 33),
+            "max_episode_steps":  getattr(vec_cfg, "max_episode_steps", 300),
+            "enable_reward":      getattr(vec_cfg, "enable_reward", False),
+            "reward_coef":        getattr(vec_cfg, "reward_coef", 1.0),
+            "ignore_terminations": getattr(vec_cfg, "ignore_terminations", False),
+            "auto_reset":         getattr(vec_cfg, "auto_reset", True),
+            "task_description":   getattr(vec_cfg, "task_description", ""),
         }
 
     # ---------------------------------------------------------------------- #

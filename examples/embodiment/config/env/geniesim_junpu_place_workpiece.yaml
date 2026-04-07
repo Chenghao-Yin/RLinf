@@ -8,7 +8,7 @@ auto_reset: true
 ignore_terminations: false
 reward_coef: 1.0
 use_rel_reward: false
-enable_reward: false   # ADER benchmark not used; reward computed in JunpuPlaceWorkpieceEnv.step()
+enable_reward: false   # Set true to enable ADER sparse reward from geniesim side
 seed: 42
 max_episode_steps: 300
 video_cfg: {}
@@ -16,21 +16,25 @@ video_cfg: {}
 init_params:
   id: junpu_place_workpiece
   task_description: "Place the workpiece into the target slot on the Junpu workstation."
+  vis_camera: true
 
   # ---- Asset paths ----
   # Uses GENIESIM_ROOT env var so the same config works on the host and in the container.
   mjcf_path: ${oc.env:GENIESIM_ROOT}/main/source/geniesim/assets/mujoco_scenes/junpu_place_workpiece.xml
-  task_file: ""   # leave empty when enable_reward is false
+  scene_usd: ${oc.env:GENIESIM_ROOT}/main/source/geniesim/assets/background/junpu/scenes/junpu.usda
+  task_file: ${oc.env:GENIESIM_ROOT}/main/source/geniesim/benchmark/config/eval_tasks
 
   # ---- Robot ----
   robot_type: G2
   robot_cfg: G2_junpu
-  # state_dim = joint_state_dim(28) + EE_STATE_DIM(12) = 40
+  # state_dim = joint_state_dim(28) + EE_STATE_DIM(24) = 52
   # states layout: [arm_l_pos(7), arm_r_pos(7), arm_l_vel(7), arm_r_vel(7),
-  #                 ee_l_pos(3), ee_l_rpy(3), ee_r_pos(3), ee_r_rpy(3)]
-  # EE poses are in base_link frame.
-  state_dim: 40
+  #                 ee_l_pos(3), ee_l_rpy(3), ee_l_lin_vel(3), ee_l_ang_vel(3),
+  #                 ee_r_pos(3), ee_r_rpy(3), ee_r_lin_vel(3), ee_r_ang_vel(3)]
+  # EE poses and velocities are in base_link frame.
+  state_dim: 52
   action_dim: 14
+  model_action_dim: 7    # right-arm only: [pos_r(3), rpy_r(3), grip_r(1)]
   # G2 model: 5 body joints come before arm joints in non-free joint order.
   # state_joint_offset=5 skips body joints → states start from arm_l_joint1.
   state_joint_offset: 5
@@ -82,15 +86,16 @@ init_params:
     - /World/workspace01
 
   # ---- Cameras ----
-  cam_width:  640
-  cam_height: 480
-  main_cam_prim:  /camera_main
-  wrist_cam_prim: ""   # set to /camera_wrist to enable wrist cam
+  cameras:
+    - name: main
+      prim: /genie/gripper_r_base_link/Right_Camera
+      width: 480
+      height: 480
 
   # ---- Sim ----
   physics_hz:    1000
   render_hz:     30.0
-  headless:      true
+  headless:      false
   ros_domain_id: 0
   shm_name:      geniesim_frames
   task_instance_id: 0
@@ -114,5 +119,5 @@ container_cfg:
   # Shared settings
   keep_alive:          true
   reuse_running:       true
-  startup_timeout_sec: 300
+  startup_timeout_sec: 600
   ros_domain_id: 0

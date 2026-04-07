@@ -167,8 +167,10 @@ def main():
     cfg = OmegaConf.load(cfg_path)
     with open_dict(cfg):
         cfg.init_params.num_envs = args.num_envs
+        cfg.init_params.headless = False
 
     action_dim: int = cfg.init_params.get("action_dim", 14)
+    model_action_dim: int = cfg.init_params.get("model_action_dim", action_dim)
 
     # ---- 2. Instantiate GenieSimEnv -------------------------------------- #
     # Import triggers @register_geniesim_env decorators
@@ -193,6 +195,7 @@ def main():
         total_num_processes=1,
         worker_info={},
     )
+    base_env._collecting = True
     atexit.register(base_env.close)
 
     # ---- 3. Build SpaceMouse expert -------------------------------------- #
@@ -232,6 +235,7 @@ def main():
         print()
 
     # ---- 4. Stack wrappers: SpaceMouse → CollectEpisode ------------------ #
+    sm_kwargs = getattr(base_env, "spacemouse_wrapper_kwargs", {})
     sm_env = SpacemouseSimIntervention(
         base_env,
         expert=expert,
@@ -239,6 +243,7 @@ def main():
         rotation_scale=args.rotation_scale,
         intervention_env_id=0,
         button_mode="junpu",
+        **sm_kwargs,
     )
 
     from rlinf.envs.wrappers.collect_episode import CollectEpisode
@@ -267,7 +272,7 @@ def main():
 
     while demos_collected < args.num_demos:
         # Zero action — SpacemouseSimIntervention overwrites env_0's slice
-        actions = torch.zeros(args.num_envs, action_dim, dtype=torch.float32)
+        actions = torch.zeros(args.num_envs, model_action_dim, dtype=torch.float32)
 
         obs, reward, terminated, truncated, info = env.step(actions)
         episode_steps += 1

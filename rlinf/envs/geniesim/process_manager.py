@@ -99,21 +99,29 @@ class SimProcessManager(BaseSimManager):
                     f"accessible — restarting local sim_server..."
                 )
             elif self._idle_file.exists():
+                if self._local_proc is not None and self._local_proc.poll() is None:
+                    print(
+                        "[SimProcess] Local sim_server is idle — "
+                        "restarting sim processes...",
+                        flush=True,
+                    )
+                    self._cleanup_stale_shm(shm_name)
+                    self._cleanup_stale_ctrl_shms(shm_name)
+                    self._cleanup_stale_step_shm(shm_name)
+                    self._idle_file.unlink(missing_ok=True)
+                    self._ready_file.unlink(missing_ok=True)
+                    self._progress_file.unlink(missing_ok=True)
+                    self._error_file.unlink(missing_ok=True)
+                    self._write_sim_config(pm_kwargs)
+                    self._start_file.write_text("start")
+                    self._wait_ready()
+                    return
                 print(
-                    "[SimProcess] Local sim_server is idle — "
-                    "restarting sim processes...",
+                    "[SimProcess] Stale .geniesim_idle found but no sim_server "
+                    "process — cleaning up and starting fresh...",
                     flush=True,
                 )
-                self._cleanup_stale_shm(shm_name)
-                self._cleanup_stale_ctrl_shms(shm_name)
                 self._idle_file.unlink(missing_ok=True)
-                self._ready_file.unlink(missing_ok=True)
-                self._progress_file.unlink(missing_ok=True)
-                self._error_file.unlink(missing_ok=True)
-                self._write_sim_config(pm_kwargs)
-                self._start_file.write_text("start")
-                self._wait_ready()
-                return
 
         # Terminate any process tracked by this instance.
         if self._local_proc is not None and self._local_proc.poll() is None:
@@ -132,6 +140,7 @@ class SimProcessManager(BaseSimManager):
         self._error_file.unlink(missing_ok=True)
         self._cleanup_stale_shm(shm_name)
         self._cleanup_stale_ctrl_shms(shm_name)
+        self._cleanup_stale_step_shm(shm_name)
         self._progress_file.unlink(missing_ok=True)
         self._write_sim_config(pm_kwargs)
         self._launch(pm_kwargs)
