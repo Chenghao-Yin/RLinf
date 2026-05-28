@@ -39,12 +39,12 @@ cluster:
 runner:
   task_type: embodied
   logger:
-    log_path: "results"
+    log_path: "results/${runner.logger.experiment_name}_${oc.env:RUN_TIMESTAMP,latest}"
     project_name: rlinf
     experiment_name: "geniesim_sac_cnn_spacemouse"
     logger_backends: ["tensorboard"]
 
-  max_epochs: 5000
+  max_epochs: 2000
   max_steps: -1
 
   only_eval: false
@@ -71,9 +71,10 @@ algorithm:
   bootstrap_type: standard
   gamma: 0.96
   tau: 0.005
+  critic_subsample_size: 2
 
-  target_entropy: -3
   entropy_tuning:
+    target_entropy: -3
     alpha_type: softplus
     initial_alpha: 0.01
     optim:
@@ -96,7 +97,7 @@ algorithm:
     auto_save: false
     # Set to the demo buffer directory produced by convert_demos_to_buffer.py.
     # Leave null to skip pre-loading (buffer will be populated online via SpaceMouse).
-    load_path: null
+    load_path: /geniesim/RLinf/my_demos_buffer
 
   target_update_freq: 1
   target_update_type: all
@@ -166,7 +167,7 @@ rollout:
   collect_prev_infos: false
 
   model:
-    model_path: "/path/to/model" # https://huggingface.co/RLinf/RLinf-ResNet10-pretrained
+    model_path: "/geniesim/RLinf/RLinf-ResNet10-pretrained" # https://huggingface.co/RLinf/RLinf-ResNet10-pretrained
     precision: ${actor.model.precision}
 
   enable_torch_compile: false
@@ -184,7 +185,7 @@ actor:
 
   model:
     model_type: cnn_policy
-    model_path: "/path/to/model" # https://huggingface.co/RLinf/RLinf-ResNet10-pretrained
+    model_path: "/geniesim/RLinf/RLinf-ResNet10-pretrained" # https://huggingface.co/RLinf/RLinf-ResNet10-pretrained
     policy_setup: "g2-ee"
     image_size: [3, 128, 128]
     image_num: 1

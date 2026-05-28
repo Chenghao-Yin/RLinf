@@ -57,6 +57,7 @@ docker_run() {
     local name="${1}"
     shift
     bash "${SCRIPT_DIR}/cleanup_stale.sh" "${GENIESIM_REPO}" 2>/dev/null || true
+    : "${RUN_TIMESTAMP:=$(date +%Y%m%d_%H%M%S)}"
     docker run -it --rm --name "$name" \
         --network host --ipc host --gpus all --privileged \
         -v ~/docker/isaac-sim/data:/isaac-sim/.local/share/ov/data \
@@ -69,6 +70,7 @@ docker_run() {
         -v ~/docker/isaac-sim/cache/glcache:/root/.cache/nvidia/GLCache \
         -v ~/docker/isaac-sim/cache/computecache:/root/.nv/ComputeCache \
         -v ~/docker/isaac-sim/logs:/root/.nvidia-omniverse/logs \
+        -v ~/docker/geniesim-logs:/tmp/geniesim_logs \
         -v ~/docker/isaac-sim/config:/root/.nvidia-omniverse/config \
         -v ~/docker/isaac-sim/data/documents:/root/Documents \
         -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
@@ -76,6 +78,7 @@ docker_run() {
         -e DISPLAY="$DISPLAY" \
         -e XAUTHORITY=/root/.Xauthority \
         -e GENIESIM_CONTAINER=1 \
+        -e RUN_TIMESTAMP="${RUN_TIMESTAMP}" \
         "$IMAGE" \
         /geniesim/scripts/run_rlinf.sh \
         "$@"

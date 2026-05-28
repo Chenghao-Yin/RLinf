@@ -108,6 +108,22 @@ class ReplayBufferDataset(IterableDataset):
                     n_demo = (
                         demo_batch["rewards"].shape[0] if "rewards" in demo_batch else 0
                     )
+                    # === BUF_PROBE: split replay vs demo ===
+                    self._probe_split = getattr(self, "_probe_split", 0)
+                    if self._probe_split < 6:
+                        self._probe_split += 1
+                        for tag, b in [("replay", replay_batch), ("demo", demo_batch)]:
+                            co = b.get("curr_obs") if isinstance(b, dict) else None
+                            if isinstance(co, dict):
+                                s = co.get("states")
+                                if isinstance(s, torch.Tensor):
+                                    sf = s.float()
+                                    print(
+                                        f"[BUF_PROBE split-{tag}] curr_obs[states] "
+                                        f"shape={tuple(s.shape)} "
+                                        f"min={sf.min().item():.4g} max={sf.max().item():.4g}",
+                                        flush=True,
+                                    )
                     batch = concat_batch(replay_batch, demo_batch)
                     batch["is_demo"] = torch.cat(
                         [
@@ -221,6 +237,22 @@ class PreloadReplayBufferDataset(ReplayBufferDataset):
                     n_demo = (
                         demo_batch["rewards"].shape[0] if "rewards" in demo_batch else 0
                     )
+                    # === BUF_PROBE: split replay vs demo ===
+                    self._probe_split = getattr(self, "_probe_split", 0)
+                    if self._probe_split < 6:
+                        self._probe_split += 1
+                        for tag, b in [("replay", replay_batch), ("demo", demo_batch)]:
+                            co = b.get("curr_obs") if isinstance(b, dict) else None
+                            if isinstance(co, dict):
+                                s = co.get("states")
+                                if isinstance(s, torch.Tensor):
+                                    sf = s.float()
+                                    print(
+                                        f"[BUF_PROBE split-{tag}] curr_obs[states] "
+                                        f"shape={tuple(s.shape)} "
+                                        f"min={sf.min().item():.4g} max={sf.max().item():.4g}",
+                                        flush=True,
+                                    )
                     batch = concat_batch(replay_batch, demo_batch)
                     batch["is_demo"] = torch.cat(
                         [

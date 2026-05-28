@@ -142,6 +142,9 @@ class PlaceWorkpieceEnv(GenieSimBaseEnv):
         self._idle_counter = np.zeros(self.num_envs, dtype=np.int32)
         self._prev_ee_pos = None
         self._custom_returns = np.zeros(self.num_envs, dtype=np.float32)
+        # PBRS state: previous-step distance for progress reward.  NaN signals
+        # "no valid previous distance" (just reset) -> r_progress = 0 that step.
+        self._prev_dist_3d = np.full(self.num_envs, np.nan, dtype=np.float32)
         self._last_extracted_states = np.zeros(
             (self.num_envs, len(_STATE_INDICES)),
             dtype=np.float32,
@@ -226,6 +229,7 @@ class PlaceWorkpieceEnv(GenieSimBaseEnv):
             self._idle_counter[:] = 0
             self._prev_ee_pos = None
             self._custom_returns[:] = 0.0
+            self._prev_dist_3d[:] = np.nan
             self._ee_target[:] = self._randomized_reset_ee(n)
         else:
             ids = np.asarray(env_ids)
@@ -240,6 +244,7 @@ class PlaceWorkpieceEnv(GenieSimBaseEnv):
                 self._prev_ee_pos[ids, :] = np.nan
             if self._prev_wp_pos is not None:
                 self._prev_wp_pos[ids, :] = float("nan")
+            self._prev_dist_3d[ids] = np.nan
             self._custom_returns[ids] = 0.0
             self._ee_target[ids] = self._randomized_reset_ee(len(ids))
         return obs, info
@@ -269,17 +274,6 @@ class PlaceWorkpieceEnv(GenieSimBaseEnv):
         self._step_counter += 1
         states = obs["states"] if isinstance(obs, dict) else obs
         rewards = self._compute_reward(infos, states)
-        self._custom_returns += rewards.numpy()
-
-        if "episode" in infos:
-            infos["episode"]["return"] = torch.from_numpy(self._custom_returns.copy())
-            infos["episode"]["reward"] = torch.from_numpy(
-                np.where(
-                    self._elapsed_steps > 0,
-                    self._custom_returns / np.maximum(self._elapsed_steps, 1),
-                    0.0,
-                ).astype(np.float32)
-            )
 
         infos["reward_detail"] = self._last_reward_detail
 
@@ -288,6 +282,16 @@ class PlaceWorkpieceEnv(GenieSimBaseEnv):
         term = torch.zeros(n, dtype=torch.bool)
 
         success_mask = torch.from_numpy(self._still_counter >= _STILL_STEPS_REQUIRED)
+
+        # Base-class _record_metrics ran with the simulator's empty reward
+        # (enable_reward=false), so success_once is still all-False. Re-OR it
+        # with the real task success_mask before any auto-reset wipes state,
+        # and overwrite the stale episode dict that _record_metrics produced.
+        self.success_once |= success_mask.numpy()
+        if "episode" in infos:
+            infos["episode"]["success_once"] = torch.from_numpy(
+                self.success_once.copy()
+            )
 
         drop_mask = self._last_dist_z < _TERM_Z_DROP
         term = term | drop_mask
@@ -352,12 +356,13 @@ class PlaceWorkpieceEnv(GenieSimBaseEnv):
                 rd = self._last_reward_detail
                 logger.debug(
                     "[TERM] env_%d (step %d): %s | "
-                    "r_alive=%.4f r_below=%.4f r_success=%.4f "
+                    "r_progress=%.4f r_z_insert=%.4f r_below=%.4f r_success=%.4f "
                     "d3d=%.4f dxy=%.4f dz=%.4f odiff=%.4f",
                     i,
                     self._step_counter[i],
                     ", ".join(reasons),
-                    rd["r_alive"][i],
+                    rd["r_progress"][i],
+                    rd["r_z_insert"][i],
                     rd["r_below"][i],
                     rd["r_success"][i],
                     rd["dist_3d"][i],
@@ -368,8 +373,42 @@ class PlaceWorkpieceEnv(GenieSimBaseEnv):
 
         terminated = terminated | term
 
-        fail_term = term & ~success_mask  # noqa: F841
-        rewards[success_mask & term] = 5.0
+        fail_term = term & ~success_mask
+        # truncated comes from the base env as a 2D tensor (num_envs, 1);
+        # squeeze to 1D so the bool indexing into the 1D `rewards` works
+        # (without this, broadcasting silently picks the wrong elements
+        # and the truncation penalty never lands).
+        truncated_1d = truncated.view(-1).bool() if truncated.ndim > 1 else truncated.bool()
+        truncated_term = truncated_1d & ~success_mask & ~fail_term
+        # Terminal bonuses overwrite the dense reward at termination so the
+        # value target bootstraps cleanly:
+        #   success -> +50  (large, dominates any hover total over an episode)
+        #   fail    -> -10  (drop / xy_far / orient_bad / ee_speed / idle)
+        #   truncation -> -10  (close the "fly high and stall to 300 steps"
+        #                       loophole; without this, agent finds an exploit
+        #                       where stalling to truncation pays better than
+        #                       any fail termination)
+        rewards[success_mask & term] = 50.0
+        rewards[fail_term] = -10.0
+        rewards[truncated_term] = -10.0
+
+        # Accumulate the *final* reward (after terminal override) into the
+        # metric. Done here, not earlier, so that the +50 / -10 terminal
+        # values actually show up in env/return on TensorBoard. Otherwise
+        # the metric only reflects the dense PBRS components and looks
+        # mysteriously close to 0 even when the agent hits termination.
+        self._custom_returns += rewards.numpy()
+        if "episode" in infos:
+            infos["episode"]["return"] = torch.from_numpy(
+                self._custom_returns.copy()
+            )
+            infos["episode"]["reward"] = torch.from_numpy(
+                np.where(
+                    self._elapsed_steps > 0,
+                    self._custom_returns / np.maximum(self._elapsed_steps, 1),
+                    0.0,
+                ).astype(np.float32)
+            )
 
         done = terminated | truncated
         if done.any():
@@ -395,6 +434,7 @@ class PlaceWorkpieceEnv(GenieSimBaseEnv):
             self._last_dist_xy = torch.zeros(n)
             self._last_dist_z = torch.zeros(n)
             self._last_orient_diff = torch.zeros(n)
+            self._prev_dist_3d[:] = np.nan
             return torch.full((n,), 0.0, dtype=torch.float32)
 
         wp = body_poses.get("workpiece_r")
@@ -403,6 +443,7 @@ class PlaceWorkpieceEnv(GenieSimBaseEnv):
             self._last_dist_xy = torch.zeros(n)
             self._last_dist_z = torch.zeros(n)
             self._last_orient_diff = torch.zeros(n)
+            self._prev_dist_3d[:] = np.nan
             return torch.full((n,), 0.0, dtype=torch.float32)
 
         wp_pos = torch.from_numpy(wp[:, :3].copy())
@@ -422,8 +463,32 @@ class PlaceWorkpieceEnv(GenieSimBaseEnv):
 
         orient_diff = _quat_angle_diff(wp_quat, target_quat)
 
-        r_alive = 5.0 * torch.exp(-10.0 * dist_3d) * torch.exp(-5.0 * orient_diff)
+        # PBRS progress reward: shrinking dist_3d -> positive, growing -> negative.
+        # Δ-form preserves the optimal policy of pure r_success but injects a
+        # gradient at every step, breaking the hover local optimum that the
+        # previous always-on r_alive bonus encouraged.
+        cur_dist_np = dist_3d.numpy().astype(np.float32)
+        valid_prev = ~np.isnan(self._prev_dist_3d)
+        delta_dist = np.where(
+            valid_prev,
+            self._prev_dist_3d - cur_dist_np,  # positive when getting closer
+            0.0,
+        ).astype(np.float32)
+        r_progress = torch.from_numpy(delta_dist) * 10.0
+        self._prev_dist_3d = cur_dist_np
 
+        # Cheap -2*|diff_z| nudge once xy is aligned: pushes the agent to
+        # actually descend into the slot instead of hovering at z=target+ε.
+        xy_aligned_now = dist_xy < _XY_TOLERANCE
+        r_z_insert = torch.where(
+            xy_aligned_now,
+            -2.0 * diff_z.abs(),
+            torch.zeros_like(diff_z),
+        )
+
+        # Symmetric overshoot penalty on z (kept asymmetric overshoot >1cm only
+        # to discourage deep collisions; the new r_z_insert handles light
+        # alignment shaping above).
         overshoot = torch.clamp(-diff_z - 0.01, min=0.0)
         r_below = -20.0 * overshoot
 
@@ -446,17 +511,22 @@ class PlaceWorkpieceEnv(GenieSimBaseEnv):
 
         success = torch.from_numpy(self._still_counter >= _STILL_STEPS_REQUIRED)  # noqa: F841
         just_succeeded = torch.from_numpy(self._still_counter == _STILL_STEPS_REQUIRED)
-        r_success = torch.where(just_succeeded, 10.0, 0.0)
+        # r_success is intentionally NOT added per-step here; the terminal
+        # success bonus is applied in step() so it bootstraps cleanly through
+        # the value target.  Keep a small one-shot pulse so progress logging
+        # reflects that success was hit.
+        r_success_pulse = torch.where(just_succeeded, 1.0, 0.0)
 
-        reward = r_alive + r_below + r_success
+        reward = r_progress + r_z_insert + r_below
 
         self._last_dist_xy = dist_xy
         self._last_dist_z = diff_z
         self._last_orient_diff = orient_diff
         self._last_reward_detail = {
-            "r_alive": r_alive,
+            "r_progress": r_progress,
+            "r_z_insert": r_z_insert,
             "r_below": r_below,
-            "r_success": r_success,
+            "r_success": r_success_pulse,
             "dist_3d": dist_3d,
             "dist_xy": dist_xy,
             "diff_z": diff_z,

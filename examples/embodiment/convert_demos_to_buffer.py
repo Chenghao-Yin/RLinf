@@ -76,15 +76,22 @@ def _quat_angle_diff_scalar(q1, q2):
     return 2.0 * np.arccos(min(dot, 1.0))
 
 
+# Reward constants — must stay in sync with place_workpiece.py.
+# (Source of truth: rlinf/envs/geniesim/tasks/place_workpiece.py)
 _REWARD_TARGET_REL_POS = np.array([-0.073, 0.007, 1.185], dtype=np.float32)
 _REWARD_TARGET_WP_QUAT = np.array([0.1807, 0.6802, 0.6847, 0.1896], dtype=np.float32)
 _REWARD_TARGET_WP_QUAT /= np.linalg.norm(_REWARD_TARGET_WP_QUAT)
-_REWARD_EE_SPEED_THRESH = 0.10
 _REWARD_XY_TOL = 0.02
 _REWARD_Z_TOL = 0.01
-_REWARD_ORIENT_TOL = 0.35
-_REWARD_STILL_SPEED = 0.002
+_REWARD_ORIENT_TOL = 0.15
+_REWARD_STILL_SPEED = 0.02
 _REWARD_STILL_STEPS = 5
+_REWARD_R_BELOW_COEF = -20.0
+_REWARD_BELOW_THRESH = 0.01
+_REWARD_R_PROGRESS_SCALE = 10.0
+_REWARD_R_Z_INSERT_COEF = -2.0
+_REWARD_TERMINAL_SUCCESS = 50.0
+_REWARD_TERMINAL_FAIL = -10.0
 
 _EE_R_RESET_POS = np.array([0.4833, 0.0051, 1.2548], dtype=np.float32)
 _EE_R_RESET_RPY = np.array([2.5633, 0.0261, 1.5791], dtype=np.float32)
@@ -93,51 +100,64 @@ _RPY_SCALE = np.float32(0.05)
 
 
 def _recompute_rewards(ep: dict) -> torch.Tensor:
+    """Replay place_workpiece.py:_compute_reward offline.
+
+    Mirrors the runtime reward in place_workpiece.py:
+      r_progress  = (prev_dist_3d - cur_dist_3d) * 10  (PBRS, 0 on first step)
+      r_z_insert  = -2 * |diff_z|  iff xy_aligned, else 0
+      r_below     = -20 * max(-diff_z - 0.01, 0)
+    Plus terminal overrides applied at the success / fail step:
+      success step -> +50  (replaces dense reward at that index)
+      fail    step -> -10  (replaces dense reward at that index)
+
+    Note on info indexing: infos[0] is the post-reset state (empty dict, no
+    body_poses), and infos[1..T] hold the post-step poses for actions[0..T-1].
+    So transition t uses infos[t+1].
+    """
     T = len(ep["actions"])
     infos = ep.get("infos", [])
-    obs_list = ep["observations"]
     tgt = _REWARD_TARGET_REL_POS
     tgt_q = _REWARD_TARGET_WP_QUAT
     prev_wp = None
-    prev_d3d = None
-    prev_odiff = None
+    prev_dist_3d = None
     still_cnt = 0
+    success_step = -1
     rewards = []
     for t in range(T):
-        bp = infos[t].get("body_poses", {}) if t < len(infos) else {}
+        # transition t corresponds to action[t] which produced infos[t+1].
+        info_idx = t + 1
+        bp = infos[info_idx].get("body_poses", {}) if info_idx < len(infos) else {}
         wp = bp.get("workpiece_r")
         ws = bp.get("/World/workspace01")
         if wp is None or ws is None:
             rewards.append(0.0)
+            prev_dist_3d = None
             continue
         wp_pos, wp_q = wp[:3].copy(), wp[3:7].copy()
         ws_pos = ws[:3].copy()
         rel = wp_pos - ws_pos
-        dxy = np.linalg.norm(rel[:2] - tgt[:2])
-        dz = rel[2] - tgt[2]
-        d3d = np.sqrt(dxy**2 + dz**2)
+        dxy = float(np.linalg.norm(rel[:2] - tgt[:2]))
+        dz = float(rel[2] - tgt[2])
+        d3d = float(np.sqrt(dxy * dxy + dz * dz))
         odiff = _quat_angle_diff_scalar(wp_q, tgt_q)
-        r_alive = 5.0 * float(np.exp(-10.0 * d3d) * np.exp(-5.0 * odiff))
-        r_approach = 0.0
-        r_orient_approach = 0.0
-        prev_d3d = d3d  # noqa: F841
-        prev_odiff = odiff  # noqa: F841
-        st = obs_list[t]["states"]
-        if isinstance(st, torch.Tensor):
-            st = st.numpy()
-        st = np.asarray(st, dtype=np.float32)
-        ee_vel = (
-            st[46:49] if len(st) >= 52 else (st[6:9] if len(st) >= 12 else np.zeros(3))
-        )
-        excess = max(0.0, float(np.linalg.norm(ee_vel)) - _REWARD_EE_SPEED_THRESH)  # noqa: F841
-        r_speed = 0.0
-        overshoot = max(0.0, -dz - 0.01)
-        r_below = -20.0 * overshoot
+
         if prev_wp is not None:
-            wp_spd = np.linalg.norm(wp_pos - prev_wp) * 30.0
+            wp_spd = float(np.linalg.norm(wp_pos - prev_wp) * 30.0)
         else:
             wp_spd = 0.0
         prev_wp = wp_pos.copy()
+
+        if prev_dist_3d is None:
+            r_progress = 0.0
+        else:
+            r_progress = (prev_dist_3d - d3d) * _REWARD_R_PROGRESS_SCALE
+        prev_dist_3d = d3d
+
+        r_z_insert = (_REWARD_R_Z_INSERT_COEF * abs(dz)) if dxy < _REWARD_XY_TOL else 0.0
+
+        overshoot = max(-dz - _REWARD_BELOW_THRESH, 0.0)
+        r_below = _REWARD_R_BELOW_COEF * overshoot
+
         near = (
             dxy < _REWARD_XY_TOL
             and abs(dz) < _REWARD_Z_TOL
@@ -148,12 +168,18 @@ def _recompute_rewards(ep: dict) -> torch.Tensor:
             still_cnt += 1
         else:
             still_cnt = 0
-        if still_cnt == _REWARD_STILL_STEPS:
-            r_succ = 10.0
-        else:
-            r_succ = 0.0
-        rewards.append(
-            r_alive + r_approach + r_orient_approach + r_speed + r_below + r_succ
+        if still_cnt == _REWARD_STILL_STEPS and success_step < 0:
+            success_step = t
+
+        rewards.append(r_progress + r_z_insert + r_below)
+
+    # Terminal overrides at the last step. demos here are all *success* episodes
+    # (filename suffix _success.pkl), so the final transition is the success
+    # step; non-success demos would receive the fail bonus.
+    if T > 0:
+        is_success = bool(ep.get("success", success_step >= 0))
+        rewards[-1] = (
+            _REWARD_TERMINAL_SUCCESS if is_success else _REWARD_TERMINAL_FAIL
         )
     return torch.tensor(rewards, dtype=torch.float32)
 
@@ -226,17 +252,28 @@ def _demo_to_trajectory(
         rewards = r_vec.reshape(T, 1, 1)
     else:
         rewards = torch.stack(
-            [_to_float_tensor(r).reshape(1) for r in rew_list], dim=0
+            [_to_float_tensor(r).reshape(1) for r in rew_list[:T]], dim=0
         )  # [T, 1]
+        # If the source recorded an extra terminal reward (rew_list has T+1
+        # entries, e.g. the r_success bonus fired on the final terminal frame),
+        # fold it into the last transition so the bonus is preserved.
+        if len(rew_list) > T:
+            extra = sum(
+                _to_float_tensor(r).reshape(1) for r in rew_list[T:]
+            )
+            rewards[-1] = rewards[-1] + extra
         rewards = rewards.unsqueeze(1)  # [T, 1, 1]
 
     # ---- terminations / truncations / dones ----
+    # Cap to T to match actions/observations length. Raw lists may contain T+1
+    # entries (one per state including the terminal); the buffer expects all
+    # transition-aligned fields to have length T.
     terminations = torch.stack(
-        [_to_bool_tensor(t).reshape(1) for t in term_list], dim=0
+        [_to_bool_tensor(t).reshape(1) for t in term_list[:T]], dim=0
     ).unsqueeze(1)  # [T, 1, 1]
 
     truncations = torch.stack(
-        [_to_bool_tensor(t).reshape(1) for t in trunc_list], dim=0
+        [_to_bool_tensor(t).reshape(1) for t in trunc_list[:T]], dim=0
     ).unsqueeze(1)  # [T, 1, 1]
 
     dones = terminations | truncations  # [T, 1, 1]

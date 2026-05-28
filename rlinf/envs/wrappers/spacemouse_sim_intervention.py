@@ -204,6 +204,15 @@ class SpacemouseSimIntervention:
         self._intervene_timeout: float = 0.5
         self._post_reset_cooldown: float = 1.0
         self._cooldown_until: float = 0.0
+        self._prev_left_btn: bool = False
+        self._prev_right_btn: bool = False
+        # Save-button "armed" flag: must be True for left-button save to fire.
+        # Disarms after a save and re-arms only when raw button reads False
+        # (operator physically released). Prevents repeat saves when a held
+        # button bridges across an episode reset.
+        self._left_btn_armed: bool = True
+        self._right_btn_armed: bool = True
+        self._episode_real_success: bool = False
 
     # ------------------------------------------------------------------
     # Internal helpers
@@ -222,6 +231,12 @@ class SpacemouseSimIntervention:
         self._last_intervene_time = 0.0
         self._btn_cooldown_until = time.time() + 0.5
         self._cooldown_until = time.time() + self._post_reset_cooldown
+        # Do NOT reset _prev_left/right_btn here: if the operator is still
+        # physically holding the button across a reset, we want the next step's
+        # raw read to be edge-equal-to-prev (no rising edge detected) so we don't
+        # immediately re-fire. The flags will naturally become False on the
+        # first step where the operator actually releases.
+        self._episode_real_success = False
         self.expert.on_episode_reset()
         return obs, info
 
@@ -237,8 +252,29 @@ class SpacemouseSimIntervention:
             actions = torch.tensor(np.asarray(actions, dtype=np.float32))
 
         sm_delta, buttons = self.expert.get_action()
-        left_btn = bool(buttons[0]) if len(buttons) > 0 else False
-        right_btn = bool(buttons[1]) if len(buttons) > 1 else False
+        # NOTE: button mapping is swapped on this physical SpaceMouse Compact —
+        # diagnostic confirmed buttons[0] = physical RIGHT, buttons[1] = physical LEFT.
+        # Without this swap, pressing the physical right button triggered the
+        # "LEFT button ignored" code path (because buttons[0] was being read
+        # as left_btn).  Verified empirically with sm_btn_test.py.
+        left_btn_raw = bool(buttons[1]) if len(buttons) > 1 else False
+        right_btn_raw = bool(buttons[0]) if len(buttons) > 0 else False
+
+        # Re-arm save buttons whenever raw read is False (operator released).
+        if not left_btn_raw:
+            self._left_btn_armed = True
+        if not right_btn_raw:
+            self._right_btn_armed = True
+
+        # Rising-edge detection: a held button only fires once.
+        left_btn = (
+            left_btn_raw and not self._prev_left_btn and self._left_btn_armed
+        )
+        right_btn = (
+            right_btn_raw and not self._prev_right_btn and self._right_btn_armed
+        )
+        self._prev_left_btn = left_btn_raw
+        self._prev_right_btn = right_btn_raw
 
         if time.time() < getattr(self, "_btn_cooldown_until", 0.0):
             left_btn = False
@@ -307,22 +343,49 @@ class SpacemouseSimIntervention:
                 actions, auto_reset=False, **kwargs
             )
 
+        # Track whether r_success fired this episode. Sparse binary reward:
+        # r = 1.0 on the success-transition step, r = 0 otherwise. Use r > 0.5
+        # as the detection threshold (handles small numerical noise).
+        try:
+            r0 = float(reward[eid]) if hasattr(reward, "__len__") else float(reward)
+            if r0 > 0.5:
+                self._episode_real_success = True
+        except Exception:
+            pass
+
         if self.button_mode == "place_workpiece":
             if left_btn or right_btn:
-                terminated = (
-                    terminated.clone()
-                    if isinstance(terminated, torch.Tensor)
-                    else torch.tensor(np.array(terminated))
-                )
-                terminated[eid] = True
-                success = bool(left_btn)
-                info["success"] = success
-                if "episode" in info and isinstance(info["episode"], dict) and success:
-                    sc = info["episode"].get("success_once")
-                    if isinstance(sc, torch.Tensor):
-                        sc = sc.clone()
-                        sc[eid] = True
-                        info["episode"]["success_once"] = sc
+                # Reject left-button save unless this episode actually triggered
+                # the task success criterion (prevents saving "I think it
+                # looked good" demos that never met the dist/orient/still bar).
+                if left_btn and not self._episode_real_success:
+                    print(
+                        "\033[1;33m[spacemouse] LEFT button ignored — episode "
+                        "never triggered r_success (>0.5). Press RIGHT to discard, "
+                        "or keep operating until you see *** REAL SUCCESS ***.\033[0m"
+                    )
+                    left_btn = False
+                if left_btn or right_btn:
+                    terminated = (
+                        terminated.clone()
+                        if isinstance(terminated, torch.Tensor)
+                        else torch.tensor(np.array(terminated))
+                    )
+                    terminated[eid] = True
+                    success = bool(left_btn)
+                    info["success"] = success
+                    if "episode" in info and isinstance(info["episode"], dict) and success:
+                        sc = info["episode"].get("success_once")
+                        if isinstance(sc, torch.Tensor):
+                            sc = sc.clone()
+                            sc[eid] = True
+                            info["episode"]["success_once"] = sc
+                    # Disarm whichever button just fired so it can't fire again
+                    # until the operator physically releases it.
+                    if left_btn:
+                        self._left_btn_armed = False
+                    if right_btn:
+                        self._right_btn_armed = False
         elif self.button_mode == "legacy" and right_btn:
             terminated = (
                 terminated.clone()

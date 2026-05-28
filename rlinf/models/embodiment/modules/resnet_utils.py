@@ -143,6 +143,13 @@ class ResNetEncoder(nn.Module):
     def _freeze_backbone_weights(self):
         for p in self.resnet_backbone.parameters():
             p.requires_grad = False
+        self.resnet_backbone.eval()
+
+    def train(self, mode: bool = True):
+        super().train(mode)
+        if self.use_pretrain:
+            self.resnet_backbone.eval()
+        return self
 
     def forward(self, x):
         x = self.resnet_backbone(x)

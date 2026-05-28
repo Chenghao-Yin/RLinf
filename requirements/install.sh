@@ -146,20 +146,26 @@ install_uv() {
 
 setup_mirror() {
     if [ "$USE_MIRRORS" -eq 1 ]; then
-        export UV_PYTHON_INSTALL_MIRROR=https://ghfast.top/https://github.com/astral-sh/python-build-standalone/releases/download
+        # ghfast.top is currently unreachable in this environment.
+        # Direct github.com release CDN works but is slow (~120 KB/s),
+        # so bump uv's HTTP timeout to allow slow downloads to finish.
+        export UV_PYTHON_INSTALL_MIRROR=https://github.com/astral-sh/python-build-standalone/releases/download
+        export UV_HTTP_TIMEOUT=600
         export UV_DEFAULT_INDEX=https://mirrors.aliyun.com/pypi/simple
         export HF_ENDPOINT=https://hf-mirror.com
-        export GITHUB_PREFIX="https://ghfast.top/"
-        git config --global url."${GITHUB_PREFIX}github.com/".insteadOf "https://github.com/"
+        # GITHUB_PREFIX is empty: uv pip install git+https://github.com/...
+        # and explicit wheel URLs all go direct. This works for repo clones
+        # (HTTP 200) and release CDN (HTTP 206 partial confirmed).
+        export GITHUB_PREFIX=""
     fi
 }
 
 unset_mirror() {
     if [ "$USE_MIRRORS" -eq 1 ]; then
         unset UV_PYTHON_INSTALL_MIRROR
+        unset UV_HTTP_TIMEOUT
         unset UV_DEFAULT_INDEX
         unset HF_ENDPOINT
-        git config --global --unset url."${GITHUB_PREFIX}github.com/".insteadOf
     fi
 }
 

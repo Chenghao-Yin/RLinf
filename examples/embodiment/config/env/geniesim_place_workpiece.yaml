@@ -19,9 +19,9 @@ init_params:
 
   # ---- Asset paths ----
   # Uses GENIESIM_ROOT env var so the same config works on the host and in the container.
-  mjcf_path: ${oc.env:GENIESIM_ROOT}/source/geniesim/assets/mujoco_scenes/place_workpiece.xml
-  scene_usd: ${oc.env:GENIESIM_ROOT}/source/geniesim/assets/background/place_workpiece/scenes/place_workpiece.usda
-  task_file: ${oc.env:GENIESIM_ROOT}/source/geniesim/benchmark/config/eval_tasks
+  # mjcf_path: ${oc.env:GENIESIM_ROOT}/source/geniesim/assets/mujoco_scenes/place_workpiece.xml
+  # scene_usd: ${oc.env:GENIESIM_ROOT}/source/geniesim/assets/background/place_workpiece/scenes/place_workpiece.usda
+  # task_file: ${oc.env:GENIESIM_ROOT}/source/geniesim/benchmark/config/eval_tasks
 
   # ---- Robot ----
   robot_type: G2

@@ -237,6 +237,38 @@ def main():
         episode_steps += 1
         total_steps += 1
 
+        # ----- live feedback to operator -----
+        rd = info.get("reward_detail")
+        if rd is not None:
+            try:
+                dxy = float(rd["dist_xy"][0])
+                dz = float(rd["diff_z"][0])
+                orient = float(rd["orient_diff"][0])
+                near_xy = dxy < 0.02
+                near_z = abs(dz) < 0.01
+                near_or = orient < 0.15
+                fx = "\033[32m✓\033[0m" if near_xy else " "
+                fz = "\033[32m✓\033[0m" if near_z else " "
+                fo = "\033[32m✓\033[0m" if near_or else " "
+                # print every 5 steps, or when all three thresholds satisfied
+                if episode_steps % 5 == 0 or (near_xy and near_z and near_or):
+                    print(
+                        f"[step {episode_steps:3d}] dxy={dxy:.3f}{fx}  "
+                        f"dz={dz:+.3f}{fz}  or={orient:.2f}{fo}"
+                    )
+            except (KeyError, IndexError, TypeError):
+                pass
+
+        try:
+            r0 = float(reward[0]) if hasattr(reward, "__len__") else float(reward)
+            if r0 > 5.0:
+                print(
+                    f"\033[1;32m[step {episode_steps}] *** REAL SUCCESS "
+                    f"(r={r0:.2f}) — press LEFT to save ***\033[0m\a"
+                )
+        except (TypeError, ValueError):
+            pass
+
         # Rate limiting
         if step_dt > 0:
             elapsed = time.monotonic() - t_last

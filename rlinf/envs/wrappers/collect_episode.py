@@ -319,22 +319,32 @@ class CollectEpisode(gym.Wrapper):
     # ─────────────────────────────────────────── episode flushing ─────────────
 
     def _maybe_flush(self, terminated, truncated) -> None:
-        """Save finished episodes and reset their buffers."""
+        """Save finished episodes and reset their buffers.
+
+        Episodes are only flushed on real `done` (terminated or truncated),
+        which—in collect mode for place_workpiece—is driven by the operator
+        pressing the SpaceMouse left/right button.  Reaching the success
+        criterion (`success_mask`) alone does NOT trigger flushing, so the
+        operator can keep manipulating the workpiece (e.g. lift it back up,
+        try again) without spamming pkl files.
+
+        Behaviour:
+          done && is_success  -> save demo (left-button success path)
+          done && !is_success -> discard if `only_success`, else save
+          not done            -> keep buffering
+        """
         for env_idx in range(self.num_envs):
-            is_success = self._get_episode_success(self._buffers[env_idx], env_idx)
             done_by_term = self._scalar_flag(terminated, env_idx)
             done_by_trunc = self._scalar_flag(truncated, env_idx)
+            if not (done_by_term or done_by_trunc):
+                continue
+            is_success = self._get_episode_success(self._buffers[env_idx], env_idx)
             if self.only_success:
                 if is_success:
                     self._flush_episode(env_idx, is_success)
-                    self._reset_env_buffer(env_idx)
-                else:
-                    if done_by_term or done_by_trunc:
-                        self._reset_env_buffer(env_idx)
             else:
-                if done_by_term or done_by_trunc:
-                    self._flush_episode(env_idx, is_success)
-                    self._reset_env_buffer(env_idx)
+                self._flush_episode(env_idx, is_success)
+            self._reset_env_buffer(env_idx)
 
     def _flush_episode(self, env_idx: int, is_success: bool) -> None:
         """Dispatch a completed episode to the appropriate format writer."""

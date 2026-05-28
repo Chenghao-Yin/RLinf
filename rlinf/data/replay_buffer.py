@@ -500,10 +500,43 @@ class TrajectoryReplayBuffer:
                 self._index_version += 1
 
             if self._flat_trajectory_cache is not None:
+                flat = self._flatten_trajectory(trajectory)
                 self._flat_trajectory_cache.put(
                     trajectory_id,
-                    self._flatten_trajectory(trajectory),
+                    flat,
                 )
+
+                # === BUF_PROBE: write-then-read-back ===
+                self._probe_add = getattr(self, "_probe_add", 0)
+                if self._probe_add < 6:
+                    self._probe_add += 1
+                    tag = f"id={id(self):#x}"
+                    flat_back = self._flat_trajectory_cache.get(trajectory_id)
+                    co_in = flat.get("curr_obs", {}) if isinstance(flat.get("curr_obs"), dict) else {}
+                    co_back = flat_back.get("curr_obs", {}) if (flat_back and isinstance(flat_back.get("curr_obs"), dict)) else {}
+                    s_in = co_in.get("states")
+                    s_back = co_back.get("states")
+                    slot = self._flat_trajectory_cache.cache.get(trajectory_id)
+                    slot_len = self._flat_trajectory_cache.get_slot_length()
+                    print(
+                        f"[BUF_PROBE add {tag}] tid={trajectory_id} slot={slot} "
+                        f"slot_len={slot_len} num_samples={num_samples}",
+                        flush=True,
+                    )
+                    if isinstance(s_in, torch.Tensor):
+                        sf = s_in.float()
+                        print(
+                            f"  flat_in   curr_obs[states] shape={tuple(s_in.shape)} "
+                            f"min={sf.min().item():.4g} max={sf.max().item():.4g}",
+                            flush=True,
+                        )
+                    if isinstance(s_back, torch.Tensor):
+                        sf = s_back.float()
+                        print(
+                            f"  flat_back curr_obs[states] shape={tuple(s_back.shape)} "
+                            f"min={sf.min().item():.4g} max={sf.max().item():.4g}",
+                            flush=True,
+                        )
 
         # Save metadata/index after all trajectory saves finish
         if self.auto_save:
@@ -708,6 +741,56 @@ class TrajectoryReplayBuffer:
             self._fill_batch_from_buffer_indices(
                 batch, concat_flat, miss_buffer_indices, miss_batch_indices
             )
+
+        # === BUF_PROBE: sample inspection ===
+        self._probe_sample = getattr(self, "_probe_sample", 0)
+        if self._probe_sample < 6:
+            self._probe_sample += 1
+            tag = f"id={id(self):#x}"
+            print(
+                f"[BUF_PROBE sample {tag}] num_chunks={num_chunks} "
+                f"window_ids={list(window_ids)} "
+                f"cum_ends={list(cumulative_ends)} "
+                f"win_total={window_total_samples}",
+                flush=True,
+            )
+            uniq_traj = torch.unique(traj_ids_tensor).tolist()
+            print(
+                f"  sampled traj_ids unique={uniq_traj} "
+                f"local_idx_min={int(local_sample_indices.min())} "
+                f"local_idx_max={int(local_sample_indices.max())}",
+                flush=True,
+            )
+            if cached_mask is not None:
+                n_hit = int(cached_mask.sum().item())
+                n_miss = num_chunks - n_hit
+                print(f"  cache hit={n_hit} miss={n_miss}", flush=True)
+                if n_hit > 0:
+                    cache_buffer = cache.get_buffer() if cache is not None else None
+                    if cache_buffer is not None:
+                        cached_traj_ids = traj_ids_tensor[cached_mask].tolist()
+                        cached_slots_p = torch.as_tensor(
+                            [cache.cache[tid] for tid in cached_traj_ids], dtype=torch.long
+                        )
+                        cached_local_p = local_sample_indices[cached_mask]
+                        slot_len_p = cache.get_slot_length()
+                        bi = cached_slots_p * slot_len_p + cached_local_p
+                        print(
+                            f"  hit buffer_indices min={int(bi.min())} max={int(bi.max())} "
+                            f"slot_len={slot_len_p}",
+                            flush=True,
+                        )
+            if isinstance(batch, dict) and "curr_obs" in batch and isinstance(batch["curr_obs"], dict):
+                s = batch["curr_obs"].get("states")
+                if isinstance(s, torch.Tensor):
+                    sf = s.float()
+                    n_bad = int(((sf.abs() > 1e6) | torch.isnan(sf) | torch.isinf(sf)).any(dim=-1).sum().item())
+                    print(
+                        f"  out batch curr_obs[states] shape={tuple(s.shape)} "
+                        f"min={sf.min().item():.4g} max={sf.max().item():.4g} "
+                        f"bad_rows(|x|>1e6)={n_bad}",
+                        flush=True,
+                    )
 
         return batch if batch is not None else {}
 

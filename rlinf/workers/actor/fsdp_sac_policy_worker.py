@@ -338,7 +338,81 @@ class EmbodiedSACFSDPPolicy(EmbodiedFSDPActor):
             trajectory: Trajectory = await input_channel.get(async_op=True).async_wait()
             recv_list.append(trajectory)
 
+        # === ROLLOUT INSPECTION ===
+        if not hasattr(self, "_inspected_rollout"):
+            self._inspected_rollout = 0
+        if self._inspected_rollout < 3:
+            print(f"\n[ROLLOUT_INSPECT] Got {len(recv_list)} trajectories from env", flush=True)
+            for ti, traj in enumerate(recv_list):
+                print(f"  --- Trajectory {ti} ---", flush=True)
+                print(f"    type={type(traj).__name__}", flush=True)
+                for attr in ["actions", "rewards", "terminations", "truncations", "dones"]:
+                    v = getattr(traj, attr, None)
+                    if v is None: continue
+                    if hasattr(v, "shape"):
+                        try:
+                            vf = v.float()
+                            print(f"    {attr}: shape={tuple(v.shape)} dtype={v.dtype} "
+                                  f"min={vf.min().item():.4g} max={vf.max().item():.4g} "
+                                  f"nan={torch.isnan(vf).any().item()} inf={torch.isinf(vf).any().item()}", flush=True)
+                        except Exception as e:
+                            print(f"    {attr}: shape={tuple(v.shape)} (stat err: {e})", flush=True)
+                for obs_attr in ["curr_obs", "next_obs"]:
+                    obs = getattr(traj, obs_attr, None)
+                    if obs is None: continue
+                    if isinstance(obs, dict):
+                        for k, v in obs.items():
+                            if hasattr(v, "shape"):
+                                try:
+                                    vf = v.float()
+                                    print(f"    {obs_attr}[{k}]: shape={tuple(v.shape)} dtype={v.dtype} "
+                                          f"min={vf.min().item():.4g} max={vf.max().item():.4g} "
+                                          f"nan={torch.isnan(vf).any().item()} inf={torch.isinf(vf).any().item()}", flush=True)
+                                except Exception as e:
+                                    print(f"    {obs_attr}[{k}]: shape={tuple(v.shape)} (stat err: {e})", flush=True)
+            self._inspected_rollout += 1
+
         self.replay_buffer.add_trajectories(recv_list)
+
+        # ---- Track per-rollout success rate for adaptive bc_coef annealing ----
+        # We detect a success step as one whose stored reward equals the
+        # terminal-success bonus written by place_workpiece.step()
+        # (rewards[success_mask & term] = 50.0).  Counting these against the
+        # number of completed episodes (terminations + truncations) gives a
+        # noisy per-rollout success rate, which we then smooth with an EMA.
+        try:
+            n_success = 0
+            n_done = 0
+            for traj in recv_list:
+                rewards = getattr(traj, "rewards", None)
+                term_t = getattr(traj, "terminations", None)
+                trunc_t = getattr(traj, "truncations", None)
+                if rewards is None:
+                    continue
+                # tolerance because terminal bonus is 50.0 verbatim
+                n_success += int((rewards >= 49.5).sum().item())
+                if term_t is not None:
+                    n_done += int(term_t.bool().sum().item())
+                if trunc_t is not None:
+                    n_done += int(trunc_t.bool().sum().item())
+            if n_done > 0:
+                rollout_success = float(n_success) / float(n_done)
+                rollout_success = max(0.0, min(1.0, rollout_success))
+            else:
+                rollout_success = None
+        except Exception:
+            rollout_success = None
+
+        if rollout_success is not None:
+            ema = float(self.cfg.algorithm.get("bc_coef_schedule", {}).get(
+                "success_rate_ema", 0.9
+            ))
+            if not hasattr(self, "_success_rate_ema") or self._success_rate_ema is None:
+                self._success_rate_ema = rollout_success
+            else:
+                self._success_rate_ema = (
+                    ema * self._success_rate_ema + (1.0 - ema) * rollout_success
+                )
 
         if self.demo_buffer is not None:
             intervene_traj_list = []
@@ -383,9 +457,28 @@ class EmbodiedSACFSDPPolicy(EmbodiedFSDPActor):
                 )
             if use_dsrl:
                 kwargs["train"] = True
+            # === NAN PROBE: inputs to critic forward ===
+            def _nan_probe(name, t):
+                if isinstance(t, torch.Tensor):
+                    bad = torch.isnan(t).any().item() or torch.isinf(t).any().item()
+                    if bad or not hasattr(self, "_probed_once"):
+                        print(f"[NAN_PROBE critic] {name}: shape={tuple(t.shape)} dtype={t.dtype} "
+                              f"min={t.float().min().item():.4g} max={t.float().max().item():.4g} "
+                              f"nan={torch.isnan(t).any().item()} inf={torch.isinf(t).any().item()}", flush=True)
+            _nan_probe("rewards_for_bootstrap", rewards_for_bootstrap)
+            _nan_probe("terminations", terminations)
+            for k, v in curr_obs.items():
+                if isinstance(v, torch.Tensor):
+                    _nan_probe(f"curr_obs[{k}]", v)
+            for k, v in next_obs.items():
+                if isinstance(v, torch.Tensor):
+                    _nan_probe(f"next_obs[{k}]", v)
+            _nan_probe("actions", actions)
             next_state_actions, next_state_log_pi, shared_feature = self.model(
                 forward_type=ForwardType.SAC, obs=next_obs, **kwargs
             )
+            _nan_probe("next_state_actions", next_state_actions)
+            _nan_probe("next_state_log_pi", next_state_log_pi)
             if next_state_log_pi.ndim == 1:
                 next_state_log_pi = next_state_log_pi.unsqueeze(-1)
             next_state_log_pi = next_state_log_pi.sum(dim=-1, keepdim=True)
@@ -398,6 +491,7 @@ class EmbodiedSACFSDPPolicy(EmbodiedFSDPActor):
                     shared_feature=None,
                     **dsrl_kwargs,
                 )
+                _nan_probe("all_qf_next_target", all_qf_next_target)
                 if self.critic_subsample_size > 0:
                     sample_idx = torch.randint(
                         0,
@@ -416,12 +510,15 @@ class EmbodiedSACFSDPPolicy(EmbodiedFSDPActor):
                     )
                 elif agg_q == "mean":
                     qf_next_target = torch.mean(all_qf_next_target, dim=1, keepdim=True)
+                _nan_probe("qf_next_target_aggregated", qf_next_target)
 
                 if self.cfg.algorithm.get("backup_entropy", True):
+                    _nan_probe("entropy_temp.alpha", self.entropy_temp.alpha)
                     qf_next_target = (
                         qf_next_target - self.entropy_temp.alpha * next_state_log_pi
                     )
                     qf_next_target = qf_next_target.to(dtype=self.torch_dtype)
+                    _nan_probe("qf_next_target_after_entropy", qf_next_target)
                 if bootstrap_type == "always":
                     target_q_values = (
                         rewards_for_bootstrap + discount * qf_next_target
@@ -435,6 +532,7 @@ class EmbodiedSACFSDPPolicy(EmbodiedFSDPActor):
                     )  # [bsz, 1]
                 else:
                     raise NotImplementedError(f"{bootstrap_type=} is not supported!")
+                _nan_probe("target_q_values", target_q_values)
 
         if not use_crossq:
             dsrl_kwargs = {"train": True} if use_dsrl else {}
@@ -444,6 +542,7 @@ class EmbodiedSACFSDPPolicy(EmbodiedFSDPActor):
                 actions=actions,
                 **dsrl_kwargs,
             )
+            _nan_probe("all_data_q_values", all_data_q_values)
         else:
             all_data_q_values, all_qf_next = self.model(
                 forward_type=ForwardType.CROSSQ_Q,
@@ -478,7 +577,42 @@ class EmbodiedSACFSDPPolicy(EmbodiedFSDPActor):
         critic_loss = F.mse_loss(
             all_data_q_values, target_q_values.expand_as(all_data_q_values)
         )
+        _nan_probe("critic_loss", critic_loss)
+        self._probed_once = True
         return critic_loss, {"q_data": all_data_q_values.mean().item()}
+
+    def _compute_bc_coef(self):
+        """Adaptive bc_coef driven by success_rate (Schedule 2.1).
+
+        Below `low_threshold`: keep bc_coef at `start_value` (BC anchors actor
+        to demo since RL has no useful signal yet).
+        Above `high_threshold`: drop bc_coef to `end_value` (RL has clearly
+        figured out the task and BC should step out of the way).
+        Between: linearly interpolate.
+
+        Falls back to the static `algorithm.bc_coef` if no schedule config is
+        present, so existing run scripts behave identically.
+        """
+        sched = self.cfg.algorithm.get("bc_coef_schedule", None)
+        static = float(self.cfg.algorithm.get("bc_coef", 0.0))
+        if sched is None or not sched.get("enabled", False):
+            return static
+
+        start = float(sched.get("start_value", static))
+        end = float(sched.get("end_value", 1.0))
+        low = float(sched.get("low_threshold", 0.05))
+        high = float(sched.get("high_threshold", 0.30))
+
+        s = getattr(self, "_success_rate_ema", None)
+        if s is None:
+            # Haven't seen any rollout yet; behave like the warmup phase.
+            return start
+        if s <= low:
+            return start
+        if s >= high:
+            return end
+        ratio = (s - low) / max(high - low, 1e-8)
+        return start + (end - start) * ratio
 
     @Worker.timer("forward_actor")
     def forward_actor(self, batch):
@@ -494,12 +628,23 @@ class EmbodiedSACFSDPPolicy(EmbodiedFSDPActor):
             kwargs["temperature"] = self.cfg.algorithm.sampling_params.temperature_train
         if self.use_dsrl:
             kwargs["train"] = True
+        # === NAN PROBE: actor forward ===
+        def _actor_probe(name, t):
+            if isinstance(t, torch.Tensor):
+                bad = torch.isnan(t).any().item() or torch.isinf(t).any().item()
+                if bad or not hasattr(self, "_actor_probed_once"):
+                    print(f"[NAN_PROBE actor] {name}: shape={tuple(t.shape)} dtype={t.dtype} "
+                          f"min={t.float().min().item():.4g} max={t.float().max().item():.4g} "
+                          f"nan={torch.isnan(t).any().item()} inf={torch.isinf(t).any().item()}", flush=True)
         pi, log_pi, shared_feature = self.model(
             forward_type=ForwardType.SAC, obs=curr_obs, **kwargs
         )
+        _actor_probe("pi", pi)
+        _actor_probe("log_pi_pre_sum", log_pi)
         if log_pi.ndim == 1:
             log_pi = log_pi.unsqueeze(-1)
         log_pi = log_pi.sum(dim=-1, keepdim=True)  # sum over the chunk dimension
+        _actor_probe("log_pi_summed", log_pi)
         if not use_crossq:
             dsrl_kwargs = {"train": True} if self.use_dsrl else {}
             all_qf_pi = self.model(
@@ -510,6 +655,7 @@ class EmbodiedSACFSDPPolicy(EmbodiedFSDPActor):
                 detach_encoder=True,
                 **dsrl_kwargs,
             )
+            _actor_probe("all_qf_pi", all_qf_pi)
         else:
             all_qf_pi, _ = self.model(
                 forward_type=ForwardType.CROSSQ_Q,
@@ -528,10 +674,17 @@ class EmbodiedSACFSDPPolicy(EmbodiedFSDPActor):
             qf_pi, _ = torch.min(all_qf_pi, dim=1, keepdim=True)
         elif agg_q == "mean":
             qf_pi = torch.mean(all_qf_pi, dim=1, keepdim=True)
+        _actor_probe("qf_pi_aggregated", qf_pi)
         metrics["q_pi"] = qf_pi.mean().item()
+        _actor_probe("entropy_temp.alpha", self.entropy_temp.alpha)
         actor_loss = ((self.entropy_temp.alpha * log_pi) - qf_pi).mean()
+        _actor_probe("actor_loss", actor_loss)
+        self._actor_probed_once = True
 
-        bc_coef = self.cfg.algorithm.get("bc_coef", 0.0)
+        bc_coef = self._compute_bc_coef()
+        metrics["bc_coef"] = float(bc_coef)
+        if hasattr(self, "_success_rate_ema") and self._success_rate_ema is not None:
+            metrics["success_rate_ema"] = float(self._success_rate_ema)
         if bc_coef > 0.0 and "is_demo" in batch:
             is_demo = batch["is_demo"].to(self.device)
             if is_demo.any():
