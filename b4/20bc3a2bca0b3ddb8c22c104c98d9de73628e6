@@ -1,0 +1,128 @@
+examples/embodiment/config/env/geniesim.yaml
+  s_3a84dbc38ab894::t_807012920c1bff 67-76
+examples/embodiment/config/geniesim_pi05_ppo_multitask6_ah10_chunk_level_1h200_4x4090_e600_ue8.yaml
+  s_3a84dbc38ab894::t_158af6e6d24d8a 128
+examples/embodiment/config/geniesim_pi05_ppo_multitask6_ah10_chunk_level_1h200_4x4090_geniesim4_phy.yaml
+  s_3a84dbc38ab894::t_d949739f8fcba8 201
+examples/embodiment/config/geniesim_pi05_ppo_multitask6_ah10_chunk_level_1h200_4x4090_geniesim4_phy_ue4_bs576.yaml
+  s_3a84dbc38ab894::t_5b1c73160571d9 208
+rlinf/envs/geniesim/geniesim_env.py
+  s_3a84dbc38ab894::t_65230872d9e7e3 32,52-53,832-854,1462-1521,1528-1530,1535,1543-1545,1759-1778
+tests/unit_tests/test_geniesim_chunk_render_skip_test.py
+  s_3a84dbc38ab894::t_8559d506bd6570 1-331
+toolkits/geniesim_experiment_lifecycle/preflight_check.py
+  s_3a84dbc38ab894::t_447fbd81998c93 34-36,208-310,402
+---
+{
+  "schema_version": "authorship/3.1.0",
+  "tlab_version": "0.13.0",
+  "base_commit_sha": "b420bc3a2bca0b3ddb8c22c104c98d9de73628e6",
+  "prompts": {},
+  "sessions": {
+    "s_3a84dbc38ab894": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "s_3a84dbc38ab894",
+        "model": "unknown"
+      },
+      "human_author": "yongxin.su <3305068309@qq.com>"
+    }
+  },
+  "changes": [
+    {
+      "new_path": "tests/unit_tests/test_geniesim_chunk_render_skip_test.py",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_3a84dbc38ab894",
+            "lines": 331
+          }
+        ]
+      }
+    },
+    {
+      "old_path": "examples/embodiment/config/env/geniesim.yaml",
+      "new_path": "examples/embodiment/config/env/geniesim.yaml",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_3a84dbc38ab894",
+            "lines": 10
+          }
+        ]
+      }
+    },
+    {
+      "old_path": "examples/embodiment/config/geniesim_pi05_ppo_multitask6_ah10_chunk_level_1h200_4x4090_e600_ue8.yaml",
+      "new_path": "examples/embodiment/config/geniesim_pi05_ppo_multitask6_ah10_chunk_level_1h200_4x4090_e600_ue8.yaml",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_3a84dbc38ab894",
+            "lines": 1
+          }
+        ]
+      },
+      "deletions": {
+        "human": 1
+      }
+    },
+    {
+      "old_path": "examples/embodiment/config/geniesim_pi05_ppo_multitask6_ah10_chunk_level_1h200_4x4090_geniesim4_phy.yaml",
+      "new_path": "examples/embodiment/config/geniesim_pi05_ppo_multitask6_ah10_chunk_level_1h200_4x4090_geniesim4_phy.yaml",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_3a84dbc38ab894",
+            "lines": 1
+          }
+        ]
+      },
+      "deletions": {
+        "human": 1
+      }
+    },
+    {
+      "old_path": "examples/embodiment/config/geniesim_pi05_ppo_multitask6_ah10_chunk_level_1h200_4x4090_geniesim4_phy_ue4_bs576.yaml",
+      "new_path": "examples/embodiment/config/geniesim_pi05_ppo_multitask6_ah10_chunk_level_1h200_4x4090_geniesim4_phy_ue4_bs576.yaml",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_3a84dbc38ab894",
+            "lines": 1
+          }
+        ]
+      },
+      "deletions": {
+        "human": 1
+      }
+    },
+    {
+      "old_path": "rlinf/envs/geniesim/geniesim_env.py",
+      "new_path": "rlinf/envs/geniesim/geniesim_env.py",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_3a84dbc38ab894",
+            "lines": 113
+          }
+        ]
+      },
+      "deletions": {
+        "human": 5
+      }
+    },
+    {
+      "old_path": "toolkits/geniesim_experiment_lifecycle/preflight_check.py",
+      "new_path": "toolkits/geniesim_experiment_lifecycle/preflight_check.py",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_3a84dbc38ab894",
+            "lines": 107
+          }
+        ]
+      }
+    }
+  ]
+}
