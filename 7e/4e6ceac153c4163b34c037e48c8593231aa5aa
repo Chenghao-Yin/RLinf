@@ -1,0 +1,53 @@
+examples/embodiment/config/geniesim_pi05_ppo_multitask6_ah10_chunk_level_1h100_4x4090_geniesim4_phy.yaml
+  s_6a162ec4d9d49a::t_fd3380a8583b8e 237,260-263
+examples/embodiment/config/geniesim_pi05_ppo_pick_block_color_ah10_chunk_level.yaml
+  s_6a162ec4d9d49a::t_b0f35072517dc7 40,197,239-242
+---
+{
+  "schema_version": "authorship/3.1.0",
+  "tlab_version": "0.13.0",
+  "base_commit_sha": "7e4e6ceac153c4163b34c037e48c8593231aa5aa",
+  "prompts": {},
+  "sessions": {
+    "s_6a162ec4d9d49a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "s_6a162ec4d9d49a",
+        "model": "unknown"
+      },
+      "human_author": "yongxin.su <3305068309@qq.com>"
+    }
+  },
+  "changes": [
+    {
+      "old_path": "examples/embodiment/config/geniesim_pi05_ppo_multitask6_ah10_chunk_level_1h100_4x4090_geniesim4_phy.yaml",
+      "new_path": "examples/embodiment/config/geniesim_pi05_ppo_multitask6_ah10_chunk_level_1h100_4x4090_geniesim4_phy.yaml",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_6a162ec4d9d49a",
+            "lines": 5
+          }
+        ]
+      },
+      "deletions": {
+        "human": 1
+      }
+    },
+    {
+      "old_path": "examples/embodiment/config/geniesim_pi05_ppo_pick_block_color_ah10_chunk_level.yaml",
+      "new_path": "examples/embodiment/config/geniesim_pi05_ppo_pick_block_color_ah10_chunk_level.yaml",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_6a162ec4d9d49a",
+            "lines": 6
+          }
+        ]
+      },
+      "deletions": {
+        "human": 2
+      }
+    }
+  ]
+}
