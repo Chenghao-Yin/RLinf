@@ -1,0 +1,36 @@
+toolkits/pi05_serving/serve_pi05_corobot.py
+  s_9f5ed3bfaa7b0e::t_8ef8cdee682909 48-49,52,90-91,102,107-120,123-128,130-132,135-136,179-187,198-202,216,222-231,303-367,393-394
+---
+{
+  "schema_version": "authorship/3.1.0",
+  "tlab_version": "0.13.0",
+  "base_commit_sha": "4d5a76622aa6c9750f098bdb6fa1343b94bbed40",
+  "prompts": {},
+  "sessions": {
+    "s_9f5ed3bfaa7b0e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "s_9f5ed3bfaa7b0e",
+        "model": "unknown"
+      },
+      "human_author": "yongxin.su <3305068309@qq.com>"
+    }
+  },
+  "changes": [
+    {
+      "old_path": "toolkits/pi05_serving/serve_pi05_corobot.py",
+      "new_path": "toolkits/pi05_serving/serve_pi05_corobot.py",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_9f5ed3bfaa7b0e",
+            "lines": 123
+          }
+        ]
+      },
+      "deletions": {
+        "human": 11
+      }
+    }
+  ]
+}
