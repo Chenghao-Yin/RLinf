@@ -1,0 +1,86 @@
+tests/unit_tests/test_geniesim_randomization_test.py
+  s_bbca2195983484::t_9661aadd3b1b15 1-156
+  s_bbca2195983484::t_bb4085ebd26940 157-159
+examples/embodiment/config/env/geniesim.yaml
+  s_bbca2195983484::t_65b57e55aeb8e6 69-102
+rlinf/envs/geniesim/geniesim_env.py
+  s_bbca2195983484::t_610fe253914b2f 186-228,236-253
+  s_bbca2195983484::t_6c63d2ca0aee15 229-235
+  s_bbca2195983484::t_b695de439f7ab3 1143-1145
+  s_bbca2195983484::t_1ed8e549a390be 254-255
+  s_bbca2195983484::t_a2a559ec9e279f 1140-1142
+  s_bbca2195983484::t_4d5d27cbb0d84d 1146-1148
+---
+{
+  "schema_version": "authorship/3.1.0",
+  "tlab_version": "0.13.1",
+  "base_commit_sha": "04513a852322d84045d0b6cb56d49fb0b63e5ff3",
+  "prompts": {},
+  "sessions": {
+    "s_bbca2195983484": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8d93d63e-ae5d-4220-8eb5-86bfddd31958",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Jonas.Lin 林奕仁 <jonaslin@agibot.com>",
+      "custom_attributes": {
+        "tlab.session_started_at": "2026-10-12T14:07:19Z",
+        "tlab.token_usage.input_tokens": "9465",
+        "tlab.token_usage.cache_creation_tokens": "29296493",
+        "tlab.token_usage.output_tokens": "3833725",
+        "tlab.token_usage.cache_read_tokens": "1826660036"
+      }
+    }
+  },
+  "changes": [
+    {
+      "new_path": "tests/unit_tests/test_geniesim_randomization_test.py",
+      "additions": {
+        "human": 21,
+        "ai": [
+          {
+            "session_id": "s_bbca2195983484",
+            "lines": 153
+          }
+        ]
+      }
+    },
+    {
+      "old_path": "examples/embodiment/config/env/geniesim.yaml",
+      "new_path": "examples/embodiment/config/env/geniesim.yaml",
+      "additions": {
+        "human": 3,
+        "ai": [
+          {
+            "session_id": "s_bbca2195983484",
+            "lines": 31
+          }
+        ]
+      }
+    },
+    {
+      "old_path": "rlinf/envs/geniesim/README.md",
+      "new_path": "rlinf/envs/geniesim/README.md",
+      "additions": {
+        "human": 16
+      }
+    },
+    {
+      "old_path": "rlinf/envs/geniesim/geniesim_env.py",
+      "new_path": "rlinf/envs/geniesim/geniesim_env.py",
+      "additions": {
+        "human": 20,
+        "ai": [
+          {
+            "session_id": "s_bbca2195983484",
+            "lines": 70
+          }
+        ]
+      },
+      "deletions": {
+        "human": 10
+      }
+    }
+  ]
+}
