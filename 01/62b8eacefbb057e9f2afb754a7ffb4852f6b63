@@ -1,0 +1,48 @@
+examples/embodiment/run_train_geniesim_pi05.sh
+  s_ae39de91db5b88::t_d2e2909184bc98 13,15
+---
+{
+  "schema_version": "authorship/3.1.0",
+  "tlab_version": "0.13.1",
+  "base_commit_sha": "0162b8eacefbb057e9f2afb754a7ffb4852f6b63",
+  "prompts": {},
+  "sessions": {
+    "s_ae39de91db5b88": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a133e9-91f3-7dc1-badd-f064e51a3fae",
+        "model": "gpt-6-sol"
+      },
+      "human_author": "yongxin.su <3305068309@qq.com>",
+      "custom_attributes": {
+        "tlab.token_usage.input_tokens": "1786196",
+        "tlab.token_usage.cache_read_tokens": "107722496",
+        "tlab.token_usage.output_tokens": "299641",
+        "tlab.token_usage.cache_creation_tokens": "0",
+        "tlab.session_started_at": "2026-10-14T03:06:02Z"
+      }
+    }
+  },
+  "changes": [
+    {
+      "old_path": "examples/embodiment/run_train_geniesim_pi05.sh",
+      "new_path": "examples/embodiment/run_train_geniesim_pi05.sh",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_ae39de91db5b88",
+            "lines": 2
+          }
+        ]
+      },
+      "deletions": {
+        "ai": [
+          {
+            "session_id": "s_ae39de91db5b88",
+            "lines": 2
+          }
+        ]
+      }
+    }
+  ]
+}
