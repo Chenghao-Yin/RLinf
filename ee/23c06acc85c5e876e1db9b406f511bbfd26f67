@@ -1,0 +1,275 @@
+---
+{
+  "schema_version": "authorship/3.1.0",
+  "tlab_version": "0.13.1",
+  "base_commit_sha": "ee23c06acc85c5e876e1db9b406f511bbfd26f67",
+  "prompts": {},
+  "changes": [
+    {
+      "new_path": ".claude/skills/geniesim-run/SKILL.md",
+      "additions": {
+        "human": 164
+      }
+    },
+    {
+      "new_path": ".claude/skills/geniesim-run/reference.md",
+      "additions": {
+        "human": 136
+      }
+    },
+    {
+      "new_path": "evaluations/geniesim_infer_smoke.py",
+      "additions": {
+        "human": 195
+      }
+    },
+    {
+      "new_path": "evaluations/run_eval_geniesim_fake.sh",
+      "additions": {
+        "human": 18
+      }
+    },
+    {
+      "new_path": "evaluations/run_eval_geniesim_pi05.sh",
+      "additions": {
+        "human": 23
+      }
+    },
+    {
+      "new_path": "examples/embodiment/config/env/geniesim.yaml",
+      "additions": {
+        "human": 142
+      }
+    },
+    {
+      "new_path": "examples/embodiment/config/geniesim_fake_eval.yaml",
+      "additions": {
+        "human": 119
+      }
+    },
+    {
+      "new_path": "examples/embodiment/config/geniesim_pi05_eval.yaml",
+      "additions": {
+        "human": 123
+      }
+    },
+    {
+      "new_path": "examples/embodiment/config/geniesim_pi05_grpo_pick_block_color_ah10_chunk_level.yaml",
+      "additions": {
+        "human": 306
+      }
+    },
+    {
+      "new_path": "examples/embodiment/config/geniesim_pi05_ppo_multitask10_ah10_chunk_level_1h100_4x4090_geniesim4_phy.yaml",
+      "additions": {
+        "human": 279
+      }
+    },
+    {
+      "new_path": "examples/embodiment/config/geniesim_pi05_ppo_multitask6_ah10_chunk_level_1h100_4x4090_geniesim4_phy.yaml",
+      "additions": {
+        "human": 308
+      }
+    },
+    {
+      "new_path": "examples/embodiment/config/geniesim_pi05_ppo_pick_block_color_ah10_chunk_level.yaml",
+      "additions": {
+        "human": 353
+      }
+    },
+    {
+      "new_path": "examples/embodiment/config/model/pi0_5_geniesim.yaml",
+      "additions": {
+        "human": 69
+      }
+    },
+    {
+      "new_path": "examples/embodiment/launch_geniesim_train.sh",
+      "additions": {
+        "human": 572
+      }
+    },
+    {
+      "new_path": "examples/embodiment/resolve_geniesim_addresses.py",
+      "additions": {
+        "human": 100
+      }
+    },
+    {
+      "new_path": "examples/embodiment/run_train_geniesim_pi05.sh",
+      "additions": {
+        "human": 48
+      }
+    },
+    {
+      "new_path": "rlinf/envs/geniesim/README.md",
+      "additions": {
+        "human": 553
+      }
+    },
+    {
+      "new_path": "rlinf/envs/geniesim/__init__.py",
+      "additions": {
+        "human": 19
+      }
+    },
+    {
+      "new_path": "rlinf/envs/geniesim/adapter.py",
+      "additions": {
+        "human": 116
+      }
+    },
+    {
+      "new_path": "rlinf/envs/geniesim/geniesim_env.py",
+      "additions": {
+        "human": 1980
+      }
+    },
+    {
+      "new_path": "rlinf/models/embodiment/openpi/dataconfig/geniesim_dataconfig.py",
+      "additions": {
+        "human": 95
+      }
+    },
+    {
+      "new_path": "rlinf/models/embodiment/openpi/policies/geniesim_policy.py",
+      "additions": {
+        "human": 209
+      }
+    },
+    {
+      "new_path": "rlinf/utils/gpu_keepalive.py",
+      "additions": {
+        "human": 321
+      }
+    },
+    {
+      "new_path": "rlinf/workers/rollout/fake_policy_worker.py",
+      "additions": {
+        "human": 125
+      }
+    },
+    {
+      "new_path": "tests/unit_tests/test_geniesim_chunk_render_skip_test.py",
+      "additions": {
+        "human": 331
+      }
+    },
+    {
+      "new_path": "tests/unit_tests/test_geniesim_chunk_rpc_test.py",
+      "additions": {
+        "human": 104
+      }
+    },
+    {
+      "new_path": "tests/unit_tests/test_geniesim_launch_addresses_test.py",
+      "additions": {
+        "human": 66
+      }
+    },
+    {
+      "new_path": "tests/unit_tests/test_geniesim_nonfinite_state_test.py",
+      "additions": {
+        "human": 626
+      }
+    },
+    {
+      "new_path": "tests/unit_tests/test_geniesim_randomization_test.py",
+      "additions": {
+        "human": 174
+      }
+    },
+    {
+      "new_path": "tests/unit_tests/test_geniesim_seed_profiles_test.py",
+      "additions": {
+        "human": 27
+      }
+    },
+    {
+      "new_path": "tests/unit_tests/test_geniesim_slot_overrides_test.py",
+      "additions": {
+        "human": 457
+      }
+    },
+    {
+      "new_path": "tests/unit_tests/test_geniesim_sub_task_stream_test.py",
+      "additions": {
+        "human": 319
+      }
+    },
+    {
+      "new_path": "tests/unit_tests/test_geniesim_work_item_striding_test.py",
+      "additions": {
+        "human": 528
+      }
+    },
+    {
+      "old_path": "docs/source-zh/rst_source/reference/algorithms/sac.rst",
+      "new_path": "docs/source-zh/rst_source/reference/algorithms/sac.rst",
+      "additions": {
+        "human": 4
+      },
+      "deletions": {
+        "human": 4
+      }
+    },
+    {
+      "old_path": "docs/source-zh/rst_source/resources/blog/cosmos3_sft_and_sglang_evaluate.rst",
+      "new_path": "docs/source-zh/rst_source/resources/blog/cosmos3_sft_and_sglang_evaluate.rst",
+      "additions": {
+        "human": 1
+      },
+      "deletions": {
+        "human": 1
+      }
+    },
+    {
+      "old_path": "evaluations/eval_embodied_agent.py",
+      "new_path": "evaluations/eval_embodied_agent.py",
+      "additions": {
+        "human": 8
+      },
+      "deletions": {
+        "human": 3
+      }
+    },
+    {
+      "old_path": "examples/embodiment/config/libero_spatial_ppo_openpi.yaml",
+      "new_path": "examples/embodiment/config/libero_spatial_ppo_openpi.yaml",
+      "deletions": {
+        "human": 1
+      }
+    },
+    {
+      "old_path": "rlinf/envs/__init__.py",
+      "new_path": "rlinf/envs/__init__.py",
+      "additions": {
+        "human": 5
+      }
+    },
+    {
+      "old_path": "rlinf/envs/action_utils.py",
+      "new_path": "rlinf/envs/action_utils.py",
+      "additions": {
+        "human": 25
+      }
+    },
+    {
+      "old_path": "rlinf/models/embodiment/openpi/dataconfig/__init__.py",
+      "new_path": "rlinf/models/embodiment/openpi/dataconfig/__init__.py",
+      "additions": {
+        "human": 23
+      }
+    },
+    {
+      "old_path": "rlinf/workers/actor/embodied_fsdp_actor_worker.py",
+      "new_path": "rlinf/workers/actor/embodied_fsdp_actor_worker.py",
+      "additions": {
+        "human": 7
+      },
+      "deletions": {
+        "human": 3
+      }
+    }
+  ]
+}

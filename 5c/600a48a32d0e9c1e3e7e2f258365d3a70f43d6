@@ -1,0 +1,188 @@
+tests/unit_tests/test_geniesim_randomization_test.py
+  s_9e9026574b6cf0::t_7194bcf70f3334 1-2
+tests/unit_tests/test_geniesim_chunk_render_skip_test.py
+  s_9e9026574b6cf0::t_7194bcf70f3334 1-2
+tests/unit_tests/test_geniesim_nonfinite_state_test.py
+  s_9e9026574b6cf0::t_7194bcf70f3334 1-2
+tests/unit_tests/test_geniesim_seed_profiles_test.py
+  s_9e9026574b6cf0::t_7194bcf70f3334 1-2
+tests/unit_tests/test_geniesim_work_item_striding_test.py
+  s_9e9026574b6cf0::t_7194bcf70f3334 1-2
+tests/unit_tests/test_geniesim_chunk_rpc_test.py
+  s_9e9026574b6cf0::t_7194bcf70f3334 1-2
+tests/unit_tests/test_geniesim_slot_overrides_test.py
+  s_9e9026574b6cf0::t_7194bcf70f3334 1-2
+tests/unit_tests/test_geniesim_sub_task_stream_test.py
+  s_9e9026574b6cf0::t_7194bcf70f3334 57,61-63,94,116,121-123,132-135,150
+---
+{
+  "schema_version": "authorship/3.1.0",
+  "tlab_version": "0.13.1",
+  "base_commit_sha": "5c600a48a32d0e9c1e3e7e2f258365d3a70f43d6",
+  "prompts": {},
+  "sessions": {
+    "s_9e9026574b6cf0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a15dcb-c6fd-7e61-ba03-c09139d4bbf5",
+        "model": "gpt-6-sol"
+      },
+      "human_author": "yongxin.su <3305068309@qq.com>",
+      "custom_attributes": {
+        "tlab.token_usage.cache_read_tokens": "39361152",
+        "tlab.session_started_at": "2026-10-21T12:15:01Z",
+        "tlab.token_usage.input_tokens": "412719",
+        "tlab.token_usage.cache_creation_tokens": "0",
+        "tlab.token_usage.output_tokens": "72731"
+      }
+    }
+  },
+  "changes": [
+    {
+      "old_path": "rlinf/envs/geniesim/geniesim_env.py",
+      "new_path": "rlinf/envs/geniesim/geniesim_env.py",
+      "additions": {
+        "human": 82
+      },
+      "deletions": {
+        "human": 26
+      }
+    },
+    {
+      "old_path": "rlinf/workers/rollout/fake_policy_worker.py",
+      "new_path": "rlinf/workers/rollout/fake_policy_worker.py",
+      "additions": {
+        "human": 12
+      },
+      "deletions": {
+        "human": 4
+      }
+    },
+    {
+      "old_path": "tests/unit_tests/test_geniesim_chunk_render_skip_test.py",
+      "new_path": "tests/unit_tests/test_geniesim_chunk_render_skip_test.py",
+      "additions": {
+        "human": 15,
+        "ai": [
+          {
+            "session_id": "s_9e9026574b6cf0",
+            "lines": 2
+          }
+        ]
+      },
+      "deletions": {
+        "human": 3
+      }
+    },
+    {
+      "old_path": "tests/unit_tests/test_geniesim_chunk_rpc_test.py",
+      "new_path": "tests/unit_tests/test_geniesim_chunk_rpc_test.py",
+      "additions": {
+        "human": 3,
+        "ai": [
+          {
+            "session_id": "s_9e9026574b6cf0",
+            "lines": 2
+          }
+        ]
+      },
+      "deletions": {
+        "human": 1
+      }
+    },
+    {
+      "old_path": "tests/unit_tests/test_geniesim_nonfinite_state_test.py",
+      "new_path": "tests/unit_tests/test_geniesim_nonfinite_state_test.py",
+      "additions": {
+        "human": 26,
+        "ai": [
+          {
+            "session_id": "s_9e9026574b6cf0",
+            "lines": 2
+          }
+        ]
+      },
+      "deletions": {
+        "human": 14
+      }
+    },
+    {
+      "old_path": "tests/unit_tests/test_geniesim_randomization_test.py",
+      "new_path": "tests/unit_tests/test_geniesim_randomization_test.py",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_9e9026574b6cf0",
+            "lines": 2
+          }
+        ]
+      }
+    },
+    {
+      "old_path": "tests/unit_tests/test_geniesim_seed_profiles_test.py",
+      "new_path": "tests/unit_tests/test_geniesim_seed_profiles_test.py",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_9e9026574b6cf0",
+            "lines": 2
+          }
+        ]
+      }
+    },
+    {
+      "old_path": "tests/unit_tests/test_geniesim_slot_overrides_test.py",
+      "new_path": "tests/unit_tests/test_geniesim_slot_overrides_test.py",
+      "additions": {
+        "human": 16,
+        "ai": [
+          {
+            "session_id": "s_9e9026574b6cf0",
+            "lines": 2
+          }
+        ]
+      },
+      "deletions": {
+        "human": 12
+      }
+    },
+    {
+      "old_path": "tests/unit_tests/test_geniesim_sub_task_stream_test.py",
+      "new_path": "tests/unit_tests/test_geniesim_sub_task_stream_test.py",
+      "additions": {
+        "human": 10,
+        "ai": [
+          {
+            "session_id": "s_9e9026574b6cf0",
+            "lines": 4
+          }
+        ]
+      },
+      "deletions": {
+        "human": 3,
+        "ai": [
+          {
+            "session_id": "s_9e9026574b6cf0",
+            "lines": 4
+          }
+        ]
+      }
+    },
+    {
+      "old_path": "tests/unit_tests/test_geniesim_work_item_striding_test.py",
+      "new_path": "tests/unit_tests/test_geniesim_work_item_striding_test.py",
+      "additions": {
+        "human": 7,
+        "ai": [
+          {
+            "session_id": "s_9e9026574b6cf0",
+            "lines": 2
+          }
+        ]
+      },
+      "deletions": {
+        "human": 2
+      }
+    }
+  ]
+}
