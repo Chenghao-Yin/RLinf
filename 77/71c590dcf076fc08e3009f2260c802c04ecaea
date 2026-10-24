@@ -1,0 +1,36 @@
+rlinf/utils/ckpt_convertor/openpi/openpi_pytorch_to_openpi.py
+  s_78121fb7c319c8::t_06aa52a49a4849 260-262,270-271
+---
+{
+  "schema_version": "authorship/3.1.0",
+  "tlab_version": "0.13.1",
+  "base_commit_sha": "7771c590dcf076fc08e3009f2260c802c04ecaea",
+  "prompts": {},
+  "sessions": {
+    "s_78121fb7c319c8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "s_78121fb7c319c8",
+        "model": "unknown"
+      },
+      "human_author": "yongxin.su <3305068309@qq.com>"
+    }
+  },
+  "changes": [
+    {
+      "old_path": "rlinf/utils/ckpt_convertor/openpi/openpi_pytorch_to_openpi.py",
+      "new_path": "rlinf/utils/ckpt_convertor/openpi/openpi_pytorch_to_openpi.py",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_78121fb7c319c8",
+            "lines": 5
+          }
+        ]
+      },
+      "deletions": {
+        "human": 1
+      }
+    }
+  ]
+}
