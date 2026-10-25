@@ -1,0 +1,97 @@
+docs/source-zh/rst_source/examples/embodied/geniesim.rst
+  s_65f3742149cf7e::t_e80646655eacd2 84,86,215-220,234,299,301-322,341-346
+  s_65f3742149cf7e::t_491e1bd0e8f11c 82,95-96,98-107,111,116,118,122,129,134,138,143-145,148,153,164-165,174-188,190,194-196,198,200,202-214,221-225,227-232,235-241,245-298,300,323-340,347-349,361,366-369,373,382,386,388
+docs/source-en/rst_source/examples/embodied/geniesim.rst
+  s_65f3742149cf7e::t_e80646655eacd2 102-104,106-109,273-278,292-293,392-394,396-417,436-441
+  s_65f3742149cf7e::t_491e1bd0e8f11c 95-98,121-122,124-137,141-142,147,149,153-154,161,167-169,173,178-180,183-184,189,204-209,218-232,234-243,247-249,251-255,257-258,260-272,279-291,294-306,308-311,315-391,395,418-435,442-444,460,465-469,473,483-485,489,491-494
+---
+{
+  "schema_version": "authorship/3.1.0",
+  "tlab_version": "0.13.1",
+  "base_commit_sha": "54fb4d722abc49e895ae807b67dedd6840416858",
+  "prompts": {},
+  "sessions": {
+    "s_4d245cbd2e3210": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a15831-50ed-7fb0-bf1e-88b826c27efe",
+        "model": "unknown"
+      },
+      "human_author": "Jonas.Lin 林奕仁 <jonaslin@agibot.com>",
+      "custom_attributes": {
+        "tlab.token_usage.cache_read_tokens": "0",
+        "tlab.token_usage.input_tokens": "0",
+        "tlab.session_started_at": "2026-10-25T13:59:00Z",
+        "tlab.token_usage.cache_creation_tokens": "0",
+        "tlab.token_usage.output_tokens": "0"
+      }
+    },
+    "s_65f3742149cf7e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a15831-50ed-7fb0-bf1e-88b826c27efe",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Jonas.Lin 林奕仁 <jonaslin@agibot.com>",
+      "custom_attributes": {
+        "tlab.token_usage.cache_creation_tokens": "0",
+        "tlab.token_usage.cache_read_tokens": "330407168",
+        "tlab.token_usage.output_tokens": "1549759",
+        "tlab.token_usage.input_tokens": "7043395",
+        "tlab.session_started_at": "2026-10-25T13:57:38Z"
+      }
+    }
+  },
+  "changes": [
+    {
+      "old_path": "docs/source-en/rst_source/examples/embodied/geniesim.rst",
+      "new_path": "docs/source-en/rst_source/examples/embodied/geniesim.rst",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_65f3742149cf7e",
+            "lines": 281
+          }
+        ]
+      },
+      "deletions": {
+        "human": 3,
+        "ai": [
+          {
+            "session_id": "s_4d245cbd2e3210",
+            "lines": 8
+          },
+          {
+            "session_id": "s_65f3742149cf7e",
+            "lines": 27
+          }
+        ]
+      }
+    },
+    {
+      "old_path": "docs/source-zh/rst_source/examples/embodied/geniesim.rst",
+      "new_path": "docs/source-zh/rst_source/examples/embodied/geniesim.rst",
+      "additions": {
+        "human": 1,
+        "ai": [
+          {
+            "session_id": "s_65f3742149cf7e",
+            "lines": 202
+          }
+        ]
+      },
+      "deletions": {
+        "ai": [
+          {
+            "session_id": "s_4d245cbd2e3210",
+            "lines": 2
+          },
+          {
+            "session_id": "s_65f3742149cf7e",
+            "lines": 28
+          }
+        ]
+      }
+    }
+  ]
+}
