@@ -80,10 +80,10 @@ rlinf/envs/__init__.py
       },
       "human_author": null,
       "custom_attributes": {
-        "tlab.session_started_at": "2026-10-24T07:00:04Z",
         "tlab.token_usage.input_tokens": "3559726",
-        "tlab.token_usage.cache_creation_tokens": "0",
         "tlab.token_usage.cache_read_tokens": "268891264",
+        "tlab.session_started_at": "2026-10-24T07:00:04Z",
+        "tlab.token_usage.cache_creation_tokens": "0",
         "tlab.token_usage.output_tokens": "527285"
       }
     },
