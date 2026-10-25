@@ -1,0 +1,85 @@
+docs/source-zh/rst_source/examples/embodied/geniesim.rst
+  s_65f3742149cf7e::t_1d6011e4831ab4 182-189,193-197,199,205,208-210,218-297,322,327-330
+  s_65f3742149cf7e::t_19b95ff5720afe 343,349
+  s_65f3742149cf7e::t_86c9663154e4ea 347
+  s_65f3742149cf7e::t_eaca8b931f6ce0 94-95,98-104,110,115,117,121,128,133,137,142-144,147,152,163-164,173,175,334
+  s_65f3742149cf7e::t_1ddbd3de2eb8e4 97,106
+  s_65f3742149cf7e::t_86793a6d5d6757 81
+  s_65f3742149cf7e::t_03eea25b21f9b4 105
+docs/source-en/rst_source/examples/embodied/geniesim.rst
+  s_65f3742149cf7e::t_86793a6d5d6757 100-103
+  s_65f3742149cf7e::t_1d6011e4831ab4 237-249,253-261,263-264,270,273-275,283-305,307-401,428,434-438
+  s_65f3742149cf7e::t_86c9663154e4ea 452-454,458,460-463
+  s_65f3742149cf7e::t_eaca8b931f6ce0 127-128,131-140,147-148,153,155,159-160,167,173-175,179,184-186,189-190,195,210-215,224,226-230,442
+  s_65f3742149cf7e::t_1ddbd3de2eb8e4 130,141-143
+  s_65f3742149cf7e::t_f4ab20e4d4e6d9 306
+---
+{
+  "schema_version": "authorship/3.1.0",
+  "tlab_version": "0.13.1",
+  "base_commit_sha": "d2590f019faf11dd2fb4067905149def04a8732b",
+  "prompts": {},
+  "sessions": {
+    "s_65f3742149cf7e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a15831-50ed-7fb0-bf1e-88b826c27efe",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Jonas.Lin 林奕仁 <jonaslin@agibot.com>",
+      "custom_attributes": {
+        "tlab.session_started_at": "2026-10-25T12:08:01Z",
+        "tlab.token_usage.output_tokens": "1540155",
+        "tlab.token_usage.cache_creation_tokens": "0",
+        "tlab.token_usage.input_tokens": "6957110",
+        "tlab.token_usage.cache_read_tokens": "329011584"
+      }
+    }
+  },
+  "changes": [
+    {
+      "old_path": "docs/source-en/rst_source/examples/embodied/geniesim.rst",
+      "new_path": "docs/source-en/rst_source/examples/embodied/geniesim.rst",
+      "additions": {
+        "human": 2,
+        "ai": [
+          {
+            "session_id": "s_65f3742149cf7e",
+            "lines": 209
+          }
+        ]
+      },
+      "deletions": {
+        "human": 4,
+        "ai": [
+          {
+            "session_id": "s_65f3742149cf7e",
+            "lines": 51
+          }
+        ]
+      }
+    },
+    {
+      "old_path": "docs/source-zh/rst_source/examples/embodied/geniesim.rst",
+      "new_path": "docs/source-zh/rst_source/examples/embodied/geniesim.rst",
+      "additions": {
+        "human": 1,
+        "ai": [
+          {
+            "session_id": "s_65f3742149cf7e",
+            "lines": 135
+          }
+        ]
+      },
+      "deletions": {
+        "human": 4,
+        "ai": [
+          {
+            "session_id": "s_65f3742149cf7e",
+            "lines": 40
+          }
+        ]
+      }
+    }
+  ]
+}
