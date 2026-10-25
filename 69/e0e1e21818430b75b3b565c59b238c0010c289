@@ -1,0 +1,84 @@
+examples/embodiment/config/geniesim_multitask4_ppo_openpi_pi05.yaml
+  s_65f3742149cf7e::t_ab48d4850ee064 117,131-135
+examples/embodiment/config/geniesim_multitask6_ppo_openpi_pi05.yaml
+  s_65f3742149cf7e::t_ab48d4850ee064 123,125,137-143
+tests/unit_tests/test_geniesim_env.py
+  s_65f3742149cf7e::t_09b87797d56f68 38-39
+---
+{
+  "schema_version": "authorship/3.1.0",
+  "tlab_version": "0.13.1",
+  "base_commit_sha": "69e0e1e21818430b75b3b565c59b238c0010c289",
+  "prompts": {},
+  "sessions": {
+    "s_65f3742149cf7e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a15831-50ed-7fb0-bf1e-88b826c27efe",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Jonas.Lin 林奕仁 <jonaslin@agibot.com>",
+      "custom_attributes": {
+        "tlab.token_usage.output_tokens": "1552145",
+        "tlab.token_usage.input_tokens": "7048852",
+        "tlab.token_usage.cache_read_tokens": "330945024",
+        "tlab.token_usage.cache_creation_tokens": "0",
+        "tlab.session_started_at": "2026-10-25T14:00:47Z"
+      }
+    }
+  },
+  "changes": [
+    {
+      "old_path": "examples/embodiment/config/geniesim_multitask4_ppo_openpi_pi05.yaml",
+      "new_path": "examples/embodiment/config/geniesim_multitask4_ppo_openpi_pi05.yaml",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_65f3742149cf7e",
+            "lines": 6
+          }
+        ]
+      },
+      "deletions": {
+        "ai": [
+          {
+            "session_id": "s_65f3742149cf7e",
+            "lines": 3
+          }
+        ]
+      }
+    },
+    {
+      "old_path": "examples/embodiment/config/geniesim_multitask6_ppo_openpi_pi05.yaml",
+      "new_path": "examples/embodiment/config/geniesim_multitask6_ppo_openpi_pi05.yaml",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_65f3742149cf7e",
+            "lines": 9
+          }
+        ]
+      },
+      "deletions": {
+        "ai": [
+          {
+            "session_id": "s_65f3742149cf7e",
+            "lines": 4
+          }
+        ]
+      }
+    },
+    {
+      "old_path": "tests/unit_tests/test_geniesim_env.py",
+      "new_path": "tests/unit_tests/test_geniesim_env.py",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_65f3742149cf7e",
+            "lines": 2
+          }
+        ]
+      }
+    }
+  ]
+}
