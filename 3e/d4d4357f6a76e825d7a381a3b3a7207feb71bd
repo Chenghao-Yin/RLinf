@@ -1,0 +1,121 @@
+docs/source-en/rst_source/examples/embodied/geniesim.rst
+  s_f9bbf76430cd77::t_b4c0e047f83b9b 65-67,71-84,180-183,413,419,459,493
+  s_f9bbf76430cd77::t_8a5b29bf928320 89-91,102-103,105-108,110-121
+  s_f9bbf76430cd77::t_01986838da485d 100-101
+  s_f9bbf76430cd77::t_a94e14c197e0c3 24-27,212,233-238,258-263,268-272,321-323,325-326,328,331-343,345-350,352-358,360-378,380,382-383,385-399,401-403,406-409
+  s_f9bbf76430cd77::t_1fd883036bba6d 15-16
+  s_f9bbf76430cd77::t_028fd7fb1acf25 12-14,17-21,32-34,52,57,92,95,130-131,153-154,264,279-280,294-295,318-319,324,327,329-330,344,351,359,379,381,384,400,404-405,410-412,414-418,420-458,460-492,494-525
+  s_f9bbf76430cd77::t_cc5fab91713f96 22,177-179,184-205
+  s_f9bbf76430cd77::t_4d5be7d2ada286 23
+  s_f9bbf76430cd77::t_dd0c8a8415d46e 273
+docs/source-zh/rst_source/examples/embodied/geniesim.rst
+  s_f9bbf76430cd77::t_028fd7fb1acf25 19,37,42,70-71,76,98,109,119,170,220,233,235,245,268-269,271,274,276-277,291,298,306,326,328,331,347,351-352,356-357,360-362,364-402,404-436,439-469
+  s_f9bbf76430cd77::t_a94e14c197e0c3 14,189-194,214-219,224-227,270,272-273,275,278-290,292-297,299-305,307-325,327,329-330,332-346,348-350,353-355
+  s_f9bbf76430cd77::t_b4c0e047f83b9b 48,50,54-67,143-144,359,363,403,437
+  s_f9bbf76430cd77::t_cc5fab91713f96 12,141-142,145-163
+  s_f9bbf76430cd77::t_8a5b29bf928320 72,83,85-87,89
+  s_f9bbf76430cd77::t_01986838da485d 81
+  s_f9bbf76430cd77::t_ab071d13f47e87 13
+  s_f9bbf76430cd77::t_5764ea675d7cc4 438
+---
+{
+  "schema_version": "authorship/3.1.0",
+  "tlab_version": "0.13.1",
+  "base_commit_sha": "3ed4d4357f6a76e825d7a381a3b3a7207feb71bd",
+  "prompts": {},
+  "sessions": {
+    "s_f9bbf76430cd77": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a171b9-9d29-7f90-aabd-5b6013f4fb2f",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "yongxin.su <3305068309@qq.com>",
+      "custom_attributes": {
+        "tlab.token_usage.cache_creation_tokens": "0",
+        "tlab.token_usage.input_tokens": "244822",
+        "tlab.session_started_at": "2026-10-25T09:33:15Z",
+        "tlab.token_usage.output_tokens": "55700",
+        "tlab.token_usage.cache_read_tokens": "22018048"
+      }
+    }
+  },
+  "changes": [
+    {
+      "old_path": "docs/source-en/_static/css/custom.css",
+      "new_path": "docs/source-en/_static/css/custom.css",
+      "additions": {
+        "human": 21
+      }
+    },
+    {
+      "old_path": "docs/source-en/rst_source/examples/embodied/geniesim.rst",
+      "new_path": "docs/source-en/rst_source/examples/embodied/geniesim.rst",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_f9bbf76430cd77",
+            "lines": 327
+          }
+        ]
+      },
+      "deletions": {
+        "human": 9,
+        "ai": [
+          {
+            "session_id": "s_f9bbf76430cd77",
+            "lines": 99
+          }
+        ]
+      }
+    },
+    {
+      "old_path": "docs/source-en/rst_source/examples/simulators_index.rst",
+      "new_path": "docs/source-en/rst_source/examples/simulators_index.rst",
+      "additions": {
+        "human": 4
+      },
+      "deletions": {
+        "human": 2
+      }
+    },
+    {
+      "old_path": "docs/source-zh/_static/css/custom.css",
+      "new_path": "docs/source-zh/_static/css/custom.css",
+      "additions": {
+        "human": 21
+      }
+    },
+    {
+      "old_path": "docs/source-zh/rst_source/examples/embodied/geniesim.rst",
+      "new_path": "docs/source-zh/rst_source/examples/embodied/geniesim.rst",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_f9bbf76430cd77",
+            "lines": 280
+          }
+        ]
+      },
+      "deletions": {
+        "human": 9,
+        "ai": [
+          {
+            "session_id": "s_f9bbf76430cd77",
+            "lines": 84
+          }
+        ]
+      }
+    },
+    {
+      "old_path": "docs/source-zh/rst_source/examples/simulators_index.rst",
+      "new_path": "docs/source-zh/rst_source/examples/simulators_index.rst",
+      "additions": {
+        "human": 4
+      },
+      "deletions": {
+        "human": 2
+      }
+    }
+  ]
+}
