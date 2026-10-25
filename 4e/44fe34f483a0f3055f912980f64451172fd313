@@ -1,0 +1,170 @@
+rlinf/envs/sim/geniesim/geniesim_env.py
+  s_d76b7032adc3a2::t_3128441e42b643 41,639,788,1197-1202,1260,1346-1351
+docs/source-en/rst_source/examples/embodied/geniesim.rst
+  s_d76b7032adc3a2::t_3128441e42b643 320-326
+docs/source-zh/rst_source/examples/embodied/geniesim.rst
+  s_d76b7032adc3a2::t_3128441e42b643 293
+rlinf/workers/env/env_worker.py
+  s_d76b7032adc3a2::t_e173cfb8c505a7 456-457,460-461,465-466,549-555
+tests/unit_tests/test_geniesim_env.py
+  s_d76b7032adc3a2::t_5c011686d900cf 352-354,461,614
+  s_d76b7032adc3a2::t_f940008492e10c 121,157-159,333-335,341,344-346,350-351,359-374,447-451,456,462-464,605-608,615-616
+examples/embodiment/config/env/geniesim.yaml
+  s_d76b7032adc3a2::t_3128441e42b643 62
+---
+{
+  "schema_version": "authorship/3.1.0",
+  "tlab_version": "0.13.1",
+  "base_commit_sha": "4e44fe34f483a0f3055f912980f64451172fd313",
+  "prompts": {},
+  "sessions": {
+    "s_88a4987e11b071": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a16da4-d495-7fe0-a7d6-6d2564d56edf",
+        "model": "unknown"
+      },
+      "human_author": "Jonas.Lin 林奕仁 <jonaslin@agibot.com>"
+    },
+    "s_d76b7032adc3a2": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a16da4-d495-7fe0-a7d6-6d2564d56edf",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Jonas.Lin 林奕仁 <jonaslin@agibot.com>",
+      "custom_attributes": {
+        "tlab.token_usage.cache_creation_tokens": "0",
+        "tlab.token_usage.input_tokens": "885315",
+        "tlab.session_started_at": "2026-10-25T08:13:22Z",
+        "tlab.token_usage.output_tokens": "130500",
+        "tlab.token_usage.cache_read_tokens": "22588800"
+      }
+    }
+  },
+  "changes": [
+    {
+      "old_path": "docs/source-en/rst_source/examples/embodied/geniesim.rst",
+      "new_path": "docs/source-en/rst_source/examples/embodied/geniesim.rst",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_d76b7032adc3a2",
+            "lines": 7
+          }
+        ]
+      },
+      "deletions": {
+        "ai": [
+          {
+            "session_id": "s_d76b7032adc3a2",
+            "lines": 6
+          }
+        ]
+      }
+    },
+    {
+      "old_path": "docs/source-zh/rst_source/examples/embodied/geniesim.rst",
+      "new_path": "docs/source-zh/rst_source/examples/embodied/geniesim.rst",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_d76b7032adc3a2",
+            "lines": 1
+          }
+        ]
+      },
+      "deletions": {
+        "ai": [
+          {
+            "session_id": "s_d76b7032adc3a2",
+            "lines": 4
+          }
+        ]
+      }
+    },
+    {
+      "old_path": "examples/embodiment/config/env/geniesim.yaml",
+      "new_path": "examples/embodiment/config/env/geniesim.yaml",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_d76b7032adc3a2",
+            "lines": 1
+          }
+        ]
+      },
+      "deletions": {
+        "ai": [
+          {
+            "session_id": "s_d76b7032adc3a2",
+            "lines": 3
+          }
+        ]
+      }
+    },
+    {
+      "old_path": "rlinf/envs/sim/geniesim/geniesim_env.py",
+      "new_path": "rlinf/envs/sim/geniesim/geniesim_env.py",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_d76b7032adc3a2",
+            "lines": 16
+          }
+        ]
+      },
+      "deletions": {
+        "human": 7,
+        "ai": [
+          {
+            "session_id": "s_d76b7032adc3a2",
+            "lines": 179
+          }
+        ]
+      }
+    },
+    {
+      "old_path": "rlinf/workers/env/env_worker.py",
+      "new_path": "rlinf/workers/env/env_worker.py",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_d76b7032adc3a2",
+            "lines": 13
+          }
+        ]
+      },
+      "deletions": {
+        "human": 1,
+        "ai": [
+          {
+            "session_id": "s_d76b7032adc3a2",
+            "lines": 26
+          }
+        ]
+      }
+    },
+    {
+      "old_path": "tests/unit_tests/test_geniesim_env.py",
+      "new_path": "tests/unit_tests/test_geniesim_env.py",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_d76b7032adc3a2",
+            "lines": 49
+          }
+        ]
+      },
+      "deletions": {
+        "human": 4,
+        "ai": [
+          {
+            "session_id": "s_d76b7032adc3a2",
+            "lines": 63
+          }
+        ]
+      }
+    }
+  ]
+}
