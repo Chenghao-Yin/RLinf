@@ -1,0 +1,58 @@
+docs/source-en/rst_source/examples/embodied/geniesim.rst
+  s_f9bbf76430cd77::t_9bfc79f2653415 95-96,100,102,104,118-119,200,210,226-228,283,290,304,311,318,325,327,332,339,342
+---
+{
+  "schema_version": "authorship/3.1.0",
+  "tlab_version": "0.13.1",
+  "base_commit_sha": "04aa49e87a48aef16036c343aa8a54bc7d7b6bdf",
+  "prompts": {},
+  "sessions": {
+    "s_f9bbf76430cd77": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a171b9-9d29-7f90-aabd-5b6013f4fb2f",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "yongxin.su <3305068309@qq.com>",
+      "custom_attributes": {
+        "tlab.token_usage.output_tokens": "98866",
+        "tlab.token_usage.cache_read_tokens": "63441152",
+        "tlab.token_usage.input_tokens": "346649",
+        "tlab.session_started_at": "2026-10-25T13:46:41Z",
+        "tlab.token_usage.cache_creation_tokens": "0"
+      }
+    }
+  },
+  "changes": [
+    {
+      "old_path": "docs/source-en/rst_source/examples/embodied/geniesim.rst",
+      "new_path": "docs/source-en/rst_source/examples/embodied/geniesim.rst",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_f9bbf76430cd77",
+            "lines": 22
+          }
+        ]
+      },
+      "deletions": {
+        "ai": [
+          {
+            "session_id": "s_f9bbf76430cd77",
+            "lines": 31
+          }
+        ]
+      }
+    },
+    {
+      "old_path": "docs/source-zh/rst_source/examples/embodied/geniesim.rst",
+      "new_path": "docs/source-zh/rst_source/examples/embodied/geniesim.rst",
+      "additions": {
+        "human": 11
+      },
+      "deletions": {
+        "human": 11
+      }
+    }
+  ]
+}
