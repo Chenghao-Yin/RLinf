@@ -1,0 +1,78 @@
+docs/source-zh/rst_source/examples/embodied/geniesim.rst
+  s_d76b7032adc3a2::t_0aeaf394a6609f 237-240
+docs/source-en/rst_source/examples/embodied/geniesim.rst
+  s_d76b7032adc3a2::t_0aeaf394a6609f 258-263
+---
+{
+  "schema_version": "authorship/3.1.0",
+  "tlab_version": "0.13.1",
+  "base_commit_sha": "ca89dfd7e178242b7e572f0bc38697b2d0e31b8a",
+  "prompts": {},
+  "sessions": {
+    "s_88a4987e11b071": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a16da4-d495-7fe0-a7d6-6d2564d56edf",
+        "model": "unknown"
+      },
+      "human_author": "Jonas.Lin 林奕仁 <jonaslin@agibot.com>"
+    },
+    "s_d76b7032adc3a2": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a16da4-d495-7fe0-a7d6-6d2564d56edf",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Jonas.Lin 林奕仁 <jonaslin@agibot.com>",
+      "custom_attributes": {
+        "tlab.token_usage.cache_read_tokens": "28593280",
+        "tlab.token_usage.output_tokens": "166457",
+        "tlab.session_started_at": "2026-10-25T08:52:07Z",
+        "tlab.token_usage.input_tokens": "995397",
+        "tlab.token_usage.cache_creation_tokens": "0"
+      }
+    }
+  },
+  "changes": [
+    {
+      "old_path": "docs/source-en/rst_source/examples/embodied/geniesim.rst",
+      "new_path": "docs/source-en/rst_source/examples/embodied/geniesim.rst",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_d76b7032adc3a2",
+            "lines": 6
+          }
+        ]
+      },
+      "deletions": {
+        "ai": [
+          {
+            "session_id": "s_d76b7032adc3a2",
+            "lines": 39
+          }
+        ]
+      }
+    },
+    {
+      "old_path": "docs/source-zh/rst_source/examples/embodied/geniesim.rst",
+      "new_path": "docs/source-zh/rst_source/examples/embodied/geniesim.rst",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_d76b7032adc3a2",
+            "lines": 4
+          }
+        ]
+      },
+      "deletions": {
+        "ai": [
+          {
+            "session_id": "s_d76b7032adc3a2",
+            "lines": 29
+          }
+        ]
+      }
+    }
+  ]
+}
