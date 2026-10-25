@@ -1,0 +1,255 @@
+examples/embodiment/config/env/geniesim.yaml
+  s_d76b7032adc3a2::t_52ef9fdd88401b 5
+  s_d76b7032adc3a2::t_3128441e42b643 62
+tests/unit_tests/test_geniesim_env.py
+  s_d76b7032adc3a2::t_bb7eb67a857630 79-80
+  s_88a4987e11b071::t_3173980636438f 607-610
+  s_d76b7032adc3a2::t_f940008492e10c 121,157-159,333-335,341,344-351,359-374,447-451,456,462-464,636-639,646-647
+  s_d76b7032adc3a2::t_1a1520384cb96c 426-427
+  s_d76b7032adc3a2::t_f316b065163170 22,122-123,177-178,180,187-188,358,376-396,422-425,428-430,438-446,457,459
+  s_d76b7032adc3a2::t_fa0ef5c4aae948 18,357,375,465-474,480-488,491-496,506-515,519-523,530-534,542,547-563,570-571,580-587,592-595,600-601,619-635,640-644
+  s_d76b7032adc3a2::t_bd6ef865583ad9 179,408-410,475-479,497-505,516-518,535-541,545-546
+  s_d76b7032adc3a2::t_5c011686d900cf 352-354,461,645
+  s_d76b7032adc3a2::t_40fff803e89ddc 431-437,572-574,577-579
+  s_d76b7032adc3a2::t_c3c30f6d85b143 17,19,23,33-40,42-51,54-78
+  s_d76b7032adc3a2::t_b4198f1dcd97ee 489-490,524-529,543-544,564-569,575-576,588-591,596-598,602-606,611-618
+  s_d76b7032adc3a2::t_52ef9fdd88401b 41,52-53
+  s_d76b7032adc3a2::t_3b69c99b940218 88,94,397-403,405-407,411-418
+  s_d76b7032adc3a2::t_fa53fde49be735 404
+  s_d76b7032adc3a2::t_296221dae1a3f5 355-356
+requirements/install.sh
+  s_d76b7032adc3a2::t_8238477d5d816c 2469-2474
+rlinf/envs/sim/geniesim/geniesim_env.py
+  s_d76b7032adc3a2::t_dfd13368bac0e3 795-798,1085-1088
+  s_d76b7032adc3a2::t_b0a93c55850e97 111,205-208,382-384
+  s_d76b7032adc3a2::t_3128441e42b643 41,639,705,790,1199-1204,1263,1349-1354
+  s_d76b7032adc3a2::t_4210feb916b98a 59,183-185,513,552-556,563,620,740,762,766,775,777-778,831,833-834,840,848,870,880,893-895,902,904-905,914,917,930-933,958,964,1045,1050,1053,1092
+  s_d76b7032adc3a2::t_bd6ef865583ad9 520,551,1216-1217,1379-1384
+  s_88a4987e11b071::t_0ce4db31715bd7 1220-1230,1232-1252,1256-1258,1262,1264-1278,1321-1322,1378,1386-1388,1390-1391
+  s_d76b7032adc3a2::t_9fdf469ce8433e 704
+examples/embodiment/config/geniesim_pick_block_color_grpo_openpi_pi05.yaml
+  s_d76b7032adc3a2::t_b0d678abdae215 87,97
+  s_d76b7032adc3a2::t_5d4469ae38704e 112-114,127
+evaluations/geniesim/geniesim_pick_block_color_eval.yaml
+  s_d76b7032adc3a2::t_5d4469ae38704e 8,21
+rlinf/models/embodiment/openpi/policies/geniesim_policy.py
+  s_d76b7032adc3a2::t_b0a93c55850e97 17-19,38-39,61,142-144
+examples/embodiment/config/geniesim_multitask10_ppo_openpi_pi05.yaml
+  s_d76b7032adc3a2::t_824ba65647a7d7 144
+  s_d76b7032adc3a2::t_5d4469ae38704e 146,158-170
+  s_d76b7032adc3a2::t_b0d678abdae215 97
+tests/e2e_tests/embodied/geniesim_ppo_openpi_pi05.yaml
+  s_d76b7032adc3a2::t_d0083c86638f9d 3-9,11-13,15,17,22-28,30-32,35-36,38-44,46-60,62,66,69-71,74-76,80-81,83-90,93-95,98-102,104-106,108-109,112-145
+  s_d76b7032adc3a2::t_8f5e5e0b38156d 1-2,10,14,16,18-21,29,33-34,37,45,61,63-65,67-68,72-73,77-79,82,91-92,96-97,103,107,110-111
+examples/embodiment/config/geniesim_pick_block_color_ppo_openpi_pi05.yaml
+  s_d76b7032adc3a2::t_5d4469ae38704e 110-112
+  s_d76b7032adc3a2::t_b0d678abdae215 86,96
+---
+{
+  "schema_version": "authorship/3.1.0",
+  "tlab_version": "0.13.1",
+  "base_commit_sha": "2b2e887f4ae47a1fb96f3bb1d104640ed0d41d5c",
+  "prompts": {},
+  "sessions": {
+    "s_88a4987e11b071": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a16da4-d495-7fe0-a7d6-6d2564d56edf",
+        "model": "unknown"
+      },
+      "human_author": "Jonas.Lin 林奕仁 <jonaslin@agibot.com>",
+      "custom_attributes": {
+        "tlab.token_usage.cache_creation_tokens": "0",
+        "tlab.token_usage.input_tokens": "0",
+        "tlab.token_usage.output_tokens": "0",
+        "tlab.session_started_at": "2026-10-25T10:51:53Z",
+        "tlab.token_usage.cache_read_tokens": "0"
+      }
+    },
+    "s_d76b7032adc3a2": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a16da4-d495-7fe0-a7d6-6d2564d56edf",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Jonas.Lin 林奕仁 <jonaslin@agibot.com>",
+      "custom_attributes": {
+        "tlab.token_usage.input_tokens": "995397",
+        "tlab.token_usage.cache_creation_tokens": "0",
+        "tlab.token_usage.output_tokens": "166457",
+        "tlab.token_usage.cache_read_tokens": "28593280",
+        "tlab.session_started_at": "2026-10-25T07:14:47Z"
+      }
+    }
+  },
+  "changes": [
+    {
+      "new_path": "tests/e2e_tests/embodied/geniesim_ppo_openpi_pi05.yaml",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_d76b7032adc3a2",
+            "lines": 145
+          }
+        ]
+      }
+    },
+    {
+      "old_path": "docker/Dockerfile",
+      "new_path": "docker/Dockerfile",
+      "deletions": {
+        "human": 9
+      }
+    },
+    {
+      "old_path": "evaluations/geniesim/geniesim_pick_block_color_eval.yaml",
+      "new_path": "evaluations/geniesim/geniesim_pick_block_color_eval.yaml",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_d76b7032adc3a2",
+            "lines": 2
+          }
+        ]
+      },
+      "deletions": {
+        "human": 1
+      }
+    },
+    {
+      "old_path": "examples/embodiment/config/env/geniesim.yaml",
+      "new_path": "examples/embodiment/config/env/geniesim.yaml",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_d76b7032adc3a2",
+            "lines": 2
+          }
+        ]
+      },
+      "deletions": {
+        "human": 6
+      }
+    },
+    {
+      "old_path": "examples/embodiment/config/geniesim_multitask10_ppo_openpi_pi05.yaml",
+      "new_path": "examples/embodiment/config/geniesim_multitask10_ppo_openpi_pi05.yaml",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_d76b7032adc3a2",
+            "lines": 16
+          }
+        ]
+      },
+      "deletions": {
+        "human": 4
+      }
+    },
+    {
+      "old_path": "examples/embodiment/config/geniesim_pick_block_color_grpo_openpi_pi05.yaml",
+      "new_path": "examples/embodiment/config/geniesim_pick_block_color_grpo_openpi_pi05.yaml",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_d76b7032adc3a2",
+            "lines": 6
+          }
+        ]
+      },
+      "deletions": {
+        "human": 4
+      }
+    },
+    {
+      "old_path": "examples/embodiment/config/geniesim_pick_block_color_ppo_openpi_pi05.yaml",
+      "new_path": "examples/embodiment/config/geniesim_pick_block_color_ppo_openpi_pi05.yaml",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_d76b7032adc3a2",
+            "lines": 5
+          }
+        ]
+      },
+      "deletions": {
+        "human": 3
+      }
+    },
+    {
+      "old_path": "requirements/install.sh",
+      "new_path": "requirements/install.sh",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_d76b7032adc3a2",
+            "lines": 6
+          }
+        ]
+      },
+      "deletions": {
+        "human": 1
+      }
+    },
+    {
+      "old_path": "rlinf/envs/sim/geniesim/geniesim_env.py",
+      "new_path": "rlinf/envs/sim/geniesim/geniesim_env.py",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_88a4987e11b071",
+            "lines": 59
+          },
+          {
+            "session_id": "s_d76b7032adc3a2",
+            "lines": 87
+          }
+        ]
+      },
+      "deletions": {
+        "human": 706
+      }
+    },
+    {
+      "old_path": "rlinf/models/embodiment/openpi/dataconfig/geniesim_dual_arm_dataconfig.py",
+      "new_path": "rlinf/models/embodiment/openpi/dataconfig/geniesim_dual_arm_dataconfig.py",
+      "deletions": {
+        "human": 1
+      }
+    },
+    {
+      "old_path": "rlinf/models/embodiment/openpi/policies/geniesim_policy.py",
+      "new_path": "rlinf/models/embodiment/openpi/policies/geniesim_policy.py",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_d76b7032adc3a2",
+            "lines": 9
+          }
+        ]
+      },
+      "deletions": {
+        "human": 53
+      }
+    },
+    {
+      "old_path": "tests/unit_tests/test_geniesim_env.py",
+      "new_path": "tests/unit_tests/test_geniesim_env.py",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_88a4987e11b071",
+            "lines": 4
+          },
+          {
+            "session_id": "s_d76b7032adc3a2",
+            "lines": 361
+          }
+        ]
+      },
+      "deletions": {
+        "human": 29
+      }
+    }
+  ]
+}
