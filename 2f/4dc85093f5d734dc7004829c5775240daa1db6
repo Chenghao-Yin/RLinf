@@ -1,0 +1,76 @@
+tests/unit_tests/test_geniesim_env.py
+  s_d76b7032adc3a2::t_b4198f1dcd97ee 489-490,524-529,543-544,564-569,575-576,588-591,596-599,602-606,611-618
+  s_88a4987e11b071::t_3173980636438f 607-610
+---
+{
+  "schema_version": "authorship/3.1.0",
+  "tlab_version": "0.13.1",
+  "base_commit_sha": "2f4dc85093f5d734dc7004829c5775240daa1db6",
+  "prompts": {},
+  "sessions": {
+    "s_88a4987e11b071": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a16da4-d495-7fe0-a7d6-6d2564d56edf",
+        "model": "unknown"
+      },
+      "human_author": "Jonas.Lin 林奕仁 <jonaslin@agibot.com>",
+      "custom_attributes": {
+        "tlab.session_started_at": "2026-10-25T08:48:12Z",
+        "tlab.token_usage.input_tokens": "0",
+        "tlab.token_usage.output_tokens": "0",
+        "tlab.token_usage.cache_creation_tokens": "0",
+        "tlab.token_usage.cache_read_tokens": "0"
+      }
+    },
+    "s_d76b7032adc3a2": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a16da4-d495-7fe0-a7d6-6d2564d56edf",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Jonas.Lin 林奕仁 <jonaslin@agibot.com>",
+      "custom_attributes": {
+        "tlab.token_usage.input_tokens": "972267",
+        "tlab.token_usage.cache_read_tokens": "26348288",
+        "tlab.token_usage.cache_creation_tokens": "0",
+        "tlab.token_usage.output_tokens": "156098",
+        "tlab.session_started_at": "2026-10-25T08:34:03Z"
+      }
+    }
+  },
+  "changes": [
+    {
+      "old_path": "rlinf/envs/sim/geniesim/geniesim_env.py",
+      "new_path": "rlinf/envs/sim/geniesim/geniesim_env.py",
+      "additions": {
+        "human": 3
+      }
+    },
+    {
+      "old_path": "tests/unit_tests/test_geniesim_env.py",
+      "new_path": "tests/unit_tests/test_geniesim_env.py",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_88a4987e11b071",
+            "lines": 4
+          },
+          {
+            "session_id": "s_d76b7032adc3a2",
+            "lines": 39
+          }
+        ]
+      },
+      "deletions": {
+        "human": 1,
+        "ai": [
+          {
+            "session_id": "s_d76b7032adc3a2",
+            "lines": 11
+          }
+        ]
+      }
+    }
+  ]
+}
