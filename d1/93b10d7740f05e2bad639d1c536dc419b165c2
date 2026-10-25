@@ -1,0 +1,660 @@
+docs/source-en/rst_source/examples/embodied/geniesim.rst
+  s_f9bbf76430cd77::t_a7d4cb9a96454b 417
+  s_f9bbf76430cd77::t_a261920e656886 324
+  s_f9bbf76430cd77::t_9bfc79f2653415 104,262,344,351,365,372,379,386,388,393,400,403
+  s_f9bbf76430cd77::t_5f59a31cd18d61 426-481,483-484
+  s_f9bbf76430cd77::t_4d5be7d2ada286 20
+  s_65f3742149cf7e::t_491e1bd0e8f11c 114-115,117-130,134,140,145-146,153,159,168-169,172,192-197,207-208,211-219,223,225,231-232,237-239,248,250,254,275,288,294
+  s_f9bbf76430cd77::t_cc5fab91713f96 19,182-184,189-191,198-204,206
+  s_f9bbf76430cd77::t_c9962c0876f104 402
+  s_f9bbf76430cd77::t_447035f16c2486 325
+  s_f9bbf76430cd77::t_eec006f4c1ad98 272,416,422-424
+  s_f9bbf76430cd77::t_0bf1bcbef0bae2 425
+  s_f9bbf76430cd77::t_dd0c8a8415d46e 264
+  s_65f3742149cf7e::t_fb82bf0c28d153 18,21-22,37,52,55,60,78,86,135,160,173,205,209-210,271,289-290
+  s_f9bbf76430cd77::t_b4c0e047f83b9b 61-62,66-77,79,185-188,486,537,580
+  s_f9bbf76430cd77::t_bbf0a4b2159aca 28-29
+  s_f9bbf76430cd77::t_8a5b29bf928320 84-85,97,99,103,105-109
+  s_f9bbf76430cd77::t_a94e14c197e0c3 259-261,263,326-328,330-331,333,336-341,343,350,352,357-359,370-371,373-374,377-378,380-381,392,394-395,398-399,401,406-408,412,414
+  s_f9bbf76430cd77::t_028fd7fb1acf25 13-17,27,47,87,90,156-157,323,329,332,334,349,356,391,396,405,409-410,415,482,485,487-489,491-492,495-497,499-501,503-505,507-509,511-513,515-517,519-521,523-525,527-529,531-533,535-536,538-540,542-543,546-548,550-552,554-556,558-560,562-564,566-568,570-572,574-576,578-579,581-583,585-586,589-591,593-595,597-599,601-603,605-607,609-611,613-615,617
+  s_65f3742149cf7e::t_2ceafc53a12222 221-222,224,226-227,234-236,240-244,249,251-253
+  s_f9bbf76430cd77::t_5f0a9c8d5ea860 265-268
+  s_a498a92b260664::t_9077652f44a0fe 1-12,23-26,30-36,38-46,48-51,53-54,56-59,63-65,80-83,88-89,91-94,98,101,110-113,116,131-133,136-139,141-144,147-152,154-155,158,161-167,170-171,174-181,228-230,233,245-247,258,273-274,277,281,286,292,296,301-304,306-308,310,313-322
+  s_4d245cbd2e3210::t_9f5a3fcafc83dc 95-96,100,102,220,255-257,269,278-280,282-285,287,297-300,305,309,311-312
+  s_f9bbf76430cd77::t_646168f80cd3e9 335,342,345-348,353-355,360-364,366-369,375-376,382-385,387,389-390,397,404,411,413,418-421,490,493-494,498,502,506,510,514,518,522,526,530,534,541,544-545,549,553,557,561,565,569,573,577,584,587-588,592,596,600,604,608,612,616
+rlinf/envs/sim/geniesim/__init__.py
+  s_a498a92b260664::t_4e6e8ead74982b 1-19
+examples/embodiment/config/geniesim_multitask4_ppo_openpi_pi05.yaml
+  s_65f3742149cf7e::t_ab48d4850ee064 86,88-91,95,117-135
+  s_65f3742149cf7e::t_24b7e06801a5b8 96-116
+  s_65f3742149cf7e::t_cba7260dc067b8 92-94
+  s_65f3742149cf7e::t_8f3d533de54b52 136-138
+  s_65f3742149cf7e::t_3a13c5b841350a 83-85
+  s_65f3742149cf7e::t_1f9efe9dc37c63 87
+  s_65f3742149cf7e::t_02fb66d11e1f9d 139-141
+examples/embodiment/config/geniesim_pick_block_color_ppo_openpi_pi05.yaml
+  s_d76b7032adc3a2::t_b0d678abdae215 86,96
+  s_a498a92b260664::t_a35e9d458f455e 1-85,87-95,97-109,113-173
+  s_d76b7032adc3a2::t_5d4469ae38704e 110-112
+docker/README.md
+  s_9e9026574b6cf0::t_ac653cdd00d4d4 19,23
+  s_9e9026574b6cf0::t_57faadd9f8cfd0 20-22
+examples/embodiment/config/env/geniesim.yaml
+  s_d76b7032adc3a2::t_c7daf75f2fe54b 62-63
+  s_d76b7032adc3a2::t_52ef9fdd88401b 5
+  s_a498a92b260664::t_d3669641340c31 1-4,6-58,60-61,64-66
+  s_d76b7032adc3a2::t_3128441e42b643 59
+examples/embodiment/config/geniesim_multitask10_ppo_openpi_pi05.yaml
+  s_a498a92b260664::t_fb382e475c3cd1 1-96,98-143,145,147-157,171-233
+  s_d76b7032adc3a2::t_5d4469ae38704e 146,158-170
+  s_d76b7032adc3a2::t_b0d678abdae215 97
+  s_d76b7032adc3a2::t_824ba65647a7d7 144
+rlinf/envs/action_utils.py
+  s_a498a92b260664::t_c0c81b6a0a3619 429-433
+docs/source-en/rst_source/examples/simulators_index.rst
+  s_a498a92b260664::t_b01cb813c62521 183-195,217
+rlinf/envs/__init__.py
+  s_a498a92b260664::t_112191f5c8bbbd 43,177-180
+requirements/install.sh
+  s_9e9026574b6cf0::t_6f03360da3f8f0 2475,2477
+  s_9e9026574b6cf0::t_af4320e2550c02 2466-2468
+  s_9e9026574b6cf0::t_498e625d1b4a91 3491-3499
+  s_d76b7032adc3a2::t_8238477d5d816c 2469-2474
+  s_a498a92b260664::t_ae7502e84c6f23 122
+  s_9e9026574b6cf0::t_c803c278efdb88 2476
+rlinf/models/embodiment/openpi/dataconfig/geniesim_dual_arm_dataconfig.py
+  s_a498a92b260664::t_3aa145aa79c704 1-85
+evaluations/run_eval.sh
+  s_a498a92b260664::t_56b6fa6c795739 52
+rlinf/models/embodiment/openpi/dataconfig/__init__.py
+  s_a498a92b260664::t_796dc957103bf0 46-48,137-145
+examples/embodiment/config/geniesim_multitask6_ppo_openpi_pi05.yaml
+  s_d76b7032adc3a2::t_eb5b951c5ae84b 155,169-171
+  s_65f3742149cf7e::t_ab48d4850ee064 86,88-91,95,123-143
+  s_65f3742149cf7e::t_18657dc8b4f89b 92-94
+  s_65f3742149cf7e::t_6367514ebbeb0d 96-122
+  s_d76b7032adc3a2::t_c7daf75f2fe54b 165-168
+  s_65f3742149cf7e::t_1b0177408d96d4 83-85
+  s_65f3742149cf7e::t_5b76c933fee28c 87
+  s_d76b7032adc3a2::t_5634a0cad8b751 156-158,162-164
+  s_d76b7032adc3a2::t_552b5d39e4324e 172-174
+tests/e2e_tests/embodied/geniesim_ppo_openpi_pi05.yaml
+  s_d76b7032adc3a2::t_d0083c86638f9d 3-9,11-13,15,17,22-28,30-32,35-36,38-44,46-60,62,66,69-71,74-76,80-81,83-90,93-95,98-102,104-106,108-109,112-145
+  s_d76b7032adc3a2::t_8f5e5e0b38156d 1-2,10,14,16,18-21,29,33-34,37,45,61,63-65,67-68,72-73,77-79,82,91-92,96-97,103,107,110-111
+docs/source-zh/rst_source/examples/embodied/geniesim.rst
+  s_f9bbf76430cd77::t_a94e14c197e0c3 209-210,218,262,264-265,267,270-275,277,284-286,291-293,304-308,311-315,326-329,332-335,340-342,346
+  s_f9bbf76430cd77::t_b4c0e047f83b9b 49,55-66,68,156-157,417,468,511
+  s_f9bbf76430cd77::t_028fd7fb1acf25 38,71-72,77,131,261,263,266,268,283,290,325,330,339,343-344,348,416,418-420,422-423,426-428,430-432,434-436,438-440,442-444,446-448,450-452,454-456,458-460,462-464,466-467,469-471,473-474,477-479,481-483,485-487,489-491,493-495,497-499,501-503,505-507,509-510,513-514,516-517,520-522,524-526,528-530,532-534,536-538,540-542,544-546,548
+  s_f9bbf76430cd77::t_a261920e656886 260
+  s_f9bbf76430cd77::t_cc5fab91713f96 154-155,158-159,162-168,170
+  s_f9bbf76430cd77::t_06f6f8f034be42 88
+  s_f9bbf76430cd77::t_cb043b17a40861 278
+  s_f9bbf76430cd77::t_64773a10ec50b6 336-337
+  s_f9bbf76430cd77::t_8a5b29bf928320 87,90
+  s_f9bbf76430cd77::t_5f0a9c8d5ea860 213
+  s_a498a92b260664::t_66ae55e7b55fc9 1-12,16-19,21-27,29-37,39-42,44-45,47-48,50,52-54,69-70,74-76,78-81,83,85,89,91-94,97,108-110,112-115,117-120,122-127,129-130,132,134-140,143-144,146-153,183,185-187,190,192,199-201,208,219-220,223,225,232-233,238-241,243-245,247,250-259,356
+  s_4d245cbd2e3210::t_9f5a3fcafc83dc 82,84,86,207,215,224,226,228,237,242,246,248-249
+  s_65f3742149cf7e::t_fb82bf0c28d153 13,15,28,43,46,51,67,73,111,133,145,169,173,217,230
+  s_f9bbf76430cd77::t_b4b8e6f3bf0991 212
+  s_f9bbf76430cd77::t_bbf0a4b2159aca 20
+  s_f9bbf76430cd77::t_646168f80cd3e9 269,276,279-282,287-289,294-303,309-310,316-324,331,338,345,347,351-352,421,424-425,429,433,437,441,445,449,453,457,461,465,472,475-476,480,484,488,492,496,500,504,508,515,518-519,523,527,531,535,539,543,547
+  s_65f3742149cf7e::t_491e1bd0e8f11c 95-96,98-107,116,121,128,141-142,160-161,171-172,174-179,181,188-189,193-194,197,202,204,206,221,227,234
+  s_f9bbf76430cd77::t_eec006f4c1ad98 349-350,353-355
+  s_f9bbf76430cd77::t_ab071d13f47e87 14
+  s_f9bbf76430cd77::t_e65ac848d26e83 211
+  s_f9bbf76430cd77::t_5f59a31cd18d61 357-415
+  s_65f3742149cf7e::t_2ceafc53a12222 180,182,184,191,195-196,198,203,205
+  s_f9bbf76430cd77::t_5764ea675d7cc4 512
+examples/embodiment/config/model/pi0_5_geniesim.yaml
+  s_a498a92b260664::t_3a1567f04c5cd8 1-51
+rlinf/models/embodiment/openpi/policies/geniesim_policy.py
+  s_a498a92b260664::t_3ad42ee63ba153 1-16,20-37,40-60,62-141,145-153
+  s_d76b7032adc3a2::t_b0a93c55850e97 17-19,38-39,61,142-144
+rlinf/envs/sim/geniesim/adapter.py
+  s_a498a92b260664::t_e9d30f41e43e71 1-114
+evaluations/geniesim/geniesim_pick_block_color_eval.yaml
+  s_a498a92b260664::t_41414ede574b6b 1-7,9-20,22-79
+  s_d76b7032adc3a2::t_5d4469ae38704e 8,21
+tests/unit_tests/test_geniesim_env.py
+  s_d76b7032adc3a2::t_1a1520384cb96c 452-453
+  s_65f3742149cf7e::t_09b87797d56f68 38-39
+  s_d76b7032adc3a2::t_c3c30f6d85b143 17,19,23,33-37,40-42,44-53,56-80
+  s_d76b7032adc3a2::t_b4198f1dcd97ee 515-516,550-555,569-570,590-595,601-602,614-617,622-624,628-632,637-644
+  s_d76b7032adc3a2::t_ff817f21738e00 81-104
+  s_a498a92b260664::t_879bd33cd188e3 1-16,20-21,24-32,107-113,115-119,121-146,150-182,186-202,207-212,215-358,362-366,368-369,445-447,478-481,484,486,674
+  s_d76b7032adc3a2::t_296221dae1a3f5 381-382
+  s_d76b7032adc3a2::t_f316b065163170 22,148-149,203-204,206,213-214,384,402-422,448-451,454-456,464-472,483,485
+  s_88a4987e11b071::t_3173980636438f 633-636
+  s_d76b7032adc3a2::t_3b69c99b940218 114,120,423-429,431-433,437-444
+  s_d76b7032adc3a2::t_fa0ef5c4aae948 18,383,401,491-500,506-514,517-522,532-541,545-549,556-560,568,573-589,596-597,606-613,618-621,625-627,645-661,666-670
+  s_d76b7032adc3a2::t_5c011686d900cf 378-380,487,671
+  s_d76b7032adc3a2::t_bb7eb67a857630 105-106
+  s_d76b7032adc3a2::t_52ef9fdd88401b 43,54-55
+  s_d76b7032adc3a2::t_fa53fde49be735 430
+  s_d76b7032adc3a2::t_40fff803e89ddc 457-463,598-600,603-605
+  s_d76b7032adc3a2::t_f940008492e10c 147,183-185,359-361,367,370-377,385-400,473-477,482,488-490,662-665,672-673
+  s_d76b7032adc3a2::t_bd6ef865583ad9 205,434-436,501-505,523-531,542-544,561-567,571-572
+rlinf/envs/sim/geniesim/geniesim_env.py
+  s_d76b7032adc3a2::t_b0a93c55850e97 111,202-205,379-381
+  s_d76b7032adc3a2::t_bd6ef865583ad9 517,548,1213-1214,1376-1381
+  s_d76b7032adc3a2::t_9fdf469ce8433e 701
+  s_a498a92b260664::t_6de2fbc8ca15cc 1-40,42-58,60-110,112-169,173-179,183-201,206-378,382-509,511-516,518-547,554-559,561-616,618-635,637-700,703-736,738-758,760-762,764-771,773,776-786,788-791,796-827,829,832-836,838-844,846-866,868-876,878-889,893-898,900,903-910,912-913,915-926,931-954,956-960,962-1041,1043-1046,1048-1049,1051-1081,1086-1088,1090-1195,1202-1212,1215-1216,1228,1250-1252,1256-1258,1276-1317,1320-1345,1352-1374,1382,1386,1389-1401
+  s_88a4987e11b071::t_0ce4db31715bd7 1217-1227,1229-1249,1253-1255,1259,1261-1275,1318-1319,1375,1383-1385,1387-1388
+  s_d76b7032adc3a2::t_4210feb916b98a 59,180-182,510,549-553,560,617,737,759,763,772,774-775,828,830-831,837,845,867,877,890-892,899,901-902,911,914,927-930,955,961,1042,1047,1050,1089
+  s_d76b7032adc3a2::t_c7daf75f2fe54b 170-172
+  s_d76b7032adc3a2::t_dfd13368bac0e3 792-795,1082-1085
+  s_d76b7032adc3a2::t_3128441e42b643 41,636,702,787,1196-1201,1260,1346-1351
+docker/Dockerfile
+  s_9e9026574b6cf0::t_22e70ece728528 538-539
+  s_9e9026574b6cf0::t_93fa504522a4af 519,521,528,530
+  s_9e9026574b6cf0::t_33b8d0fd098283 522
+  s_9e9026574b6cf0::t_e50eefa543f406 87
+  s_9e9026574b6cf0::t_cd33f9b45f66eb 520,523-525
+  s_9e9026574b6cf0::t_a9409ee3610d0a 533-536
+  s_9e9026574b6cf0::t_158ff1ea4bb1db 537
+  s_9e9026574b6cf0::t_873420c094af64 526-527,529,531-532
+examples/embodiment/config/geniesim_pick_block_color_grpo_openpi_pi05.yaml
+  s_d76b7032adc3a2::t_b0d678abdae215 87,97
+  s_d76b7032adc3a2::t_5d4469ae38704e 112-114,127
+  s_a498a92b260664::t_31372303497225 1-86,88-96,98-111,115-126,128-170
+docs/source-zh/rst_source/examples/simulators_index.rst
+  s_a498a92b260664::t_ceeed008b2e52d 183-195,217
+---
+{
+  "schema_version": "authorship/3.1.0",
+  "tlab_version": "0.13.1",
+  "base_commit_sha": "d193b10d7740f05e2bad639d1c536dc419b165c2",
+  "prompts": {},
+  "sessions": {
+    "s_4d245cbd2e3210": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a15831-50ed-7fb0-bf1e-88b826c27efe",
+        "model": "unknown"
+      },
+      "human_author": "Jonas.Lin 林奕仁 <jonaslin@agibot.com>",
+      "custom_attributes": {
+        "tlab.token_usage.cache_read_tokens": "0",
+        "tlab.token_usage.output_tokens": "0",
+        "tlab.session_started_at": "2026-10-25T13:59:00Z",
+        "tlab.token_usage.input_tokens": "0",
+        "tlab.token_usage.cache_creation_tokens": "0"
+      }
+    },
+    "s_65f3742149cf7e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a15831-50ed-7fb0-bf1e-88b826c27efe",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Jonas.Lin 林奕仁 <jonaslin@agibot.com>",
+      "custom_attributes": {
+        "tlab.token_usage.output_tokens": "1615178",
+        "tlab.token_usage.input_tokens": "7191353",
+        "tlab.token_usage.cache_creation_tokens": "0",
+        "tlab.session_started_at": "2026-10-25T13:57:38Z",
+        "tlab.token_usage.cache_read_tokens": "342577280"
+      }
+    },
+    "s_88a4987e11b071": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a16da4-d495-7fe0-a7d6-6d2564d56edf",
+        "model": "unknown"
+      },
+      "human_author": "Jonas.Lin 林奕仁 <jonaslin@agibot.com>",
+      "custom_attributes": {
+        "tlab.token_usage.output_tokens": "0",
+        "tlab.token_usage.input_tokens": "0",
+        "tlab.session_started_at": "2026-10-25T10:51:53Z",
+        "tlab.token_usage.cache_read_tokens": "0",
+        "tlab.token_usage.cache_creation_tokens": "0"
+      }
+    },
+    "s_9e9026574b6cf0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a15dcb-c6fd-7e61-ba03-c09139d4bbf5",
+        "model": "gpt-6-sol"
+      },
+      "human_author": null
+    },
+    "s_a498a92b260664": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "s_a498a92b260664",
+        "model": "unknown"
+      },
+      "human_author": "yongxin.su <3305068309@qq.com>"
+    },
+    "s_d76b7032adc3a2": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a16da4-d495-7fe0-a7d6-6d2564d56edf",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Jonas.Lin 林奕仁 <jonaslin@agibot.com>",
+      "custom_attributes": {
+        "tlab.token_usage.output_tokens": "290220",
+        "tlab.token_usage.cache_read_tokens": "53088000",
+        "tlab.token_usage.cache_creation_tokens": "0",
+        "tlab.token_usage.input_tokens": "1746196",
+        "tlab.session_started_at": "2026-10-25T07:14:47Z"
+      }
+    },
+    "s_f9bbf76430cd77": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a171b9-9d29-7f90-aabd-5b6013f4fb2f",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "yongxin.su <3305068309@qq.com>",
+      "custom_attributes": {
+        "tlab.session_started_at": "2026-10-25T09:33:15Z",
+        "tlab.token_usage.cache_read_tokens": "63441152",
+        "tlab.token_usage.input_tokens": "346649",
+        "tlab.token_usage.output_tokens": "98866",
+        "tlab.token_usage.cache_creation_tokens": "0"
+      }
+    }
+  },
+  "changes": [
+    {
+      "new_path": "docs/source-en/rst_source/examples/embodied/geniesim.rst",
+      "additions": {
+        "human": 5,
+        "ai": [
+          {
+            "session_id": "s_4d245cbd2e3210",
+            "lines": 25
+          },
+          {
+            "session_id": "s_65f3742149cf7e",
+            "lines": 90
+          },
+          {
+            "session_id": "s_a498a92b260664",
+            "lines": 132
+          },
+          {
+            "session_id": "s_f9bbf76430cd77",
+            "lines": 365
+          }
+        ]
+      }
+    },
+    {
+      "new_path": "docs/source-zh/rst_source/examples/embodied/geniesim.rst",
+      "additions": {
+        "human": 7,
+        "ai": [
+          {
+            "session_id": "s_4d245cbd2e3210",
+            "lines": 13
+          },
+          {
+            "session_id": "s_65f3742149cf7e",
+            "lines": 63
+          },
+          {
+            "session_id": "s_a498a92b260664",
+            "lines": 133
+          },
+          {
+            "session_id": "s_f9bbf76430cd77",
+            "lines": 332
+          }
+        ]
+      }
+    },
+    {
+      "new_path": "evaluations/geniesim/geniesim_pick_block_color_eval.yaml",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_a498a92b260664",
+            "lines": 77
+          },
+          {
+            "session_id": "s_d76b7032adc3a2",
+            "lines": 2
+          }
+        ]
+      }
+    },
+    {
+      "new_path": "examples/embodiment/config/env/geniesim.yaml",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_a498a92b260664",
+            "lines": 62
+          },
+          {
+            "session_id": "s_d76b7032adc3a2",
+            "lines": 4
+          }
+        ]
+      }
+    },
+    {
+      "new_path": "examples/embodiment/config/geniesim_multitask10_ppo_openpi_pi05.yaml",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_a498a92b260664",
+            "lines": 217
+          },
+          {
+            "session_id": "s_d76b7032adc3a2",
+            "lines": 16
+          }
+        ]
+      }
+    },
+    {
+      "new_path": "examples/embodiment/config/geniesim_multitask4_ppo_openpi_pi05.yaml",
+      "additions": {
+        "human": 166,
+        "ai": [
+          {
+            "session_id": "s_65f3742149cf7e",
+            "lines": 32
+          }
+        ]
+      }
+    },
+    {
+      "new_path": "examples/embodiment/config/geniesim_multitask6_ppo_openpi_pi05.yaml",
+      "additions": {
+        "human": 168,
+        "ai": [
+          {
+            "session_id": "s_65f3742149cf7e",
+            "lines": 31
+          },
+          {
+            "session_id": "s_d76b7032adc3a2",
+            "lines": 7
+          }
+        ]
+      }
+    },
+    {
+      "new_path": "examples/embodiment/config/geniesim_pick_block_color_grpo_openpi_pi05.yaml",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_a498a92b260664",
+            "lines": 164
+          },
+          {
+            "session_id": "s_d76b7032adc3a2",
+            "lines": 6
+          }
+        ]
+      }
+    },
+    {
+      "new_path": "examples/embodiment/config/geniesim_pick_block_color_ppo_openpi_pi05.yaml",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_a498a92b260664",
+            "lines": 168
+          },
+          {
+            "session_id": "s_d76b7032adc3a2",
+            "lines": 5
+          }
+        ]
+      }
+    },
+    {
+      "new_path": "examples/embodiment/config/model/pi0_5_geniesim.yaml",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_a498a92b260664",
+            "lines": 51
+          }
+        ]
+      }
+    },
+    {
+      "new_path": "rlinf/envs/sim/geniesim/__init__.py",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_a498a92b260664",
+            "lines": 19
+          }
+        ]
+      }
+    },
+    {
+      "new_path": "rlinf/envs/sim/geniesim/adapter.py",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_a498a92b260664",
+            "lines": 114
+          }
+        ]
+      }
+    },
+    {
+      "new_path": "rlinf/envs/sim/geniesim/geniesim_env.py",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_88a4987e11b071",
+            "lines": 59
+          },
+          {
+            "session_id": "s_a498a92b260664",
+            "lines": 1252
+          },
+          {
+            "session_id": "s_d76b7032adc3a2",
+            "lines": 90
+          }
+        ]
+      }
+    },
+    {
+      "new_path": "rlinf/models/embodiment/openpi/dataconfig/geniesim_dual_arm_dataconfig.py",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_a498a92b260664",
+            "lines": 85
+          }
+        ]
+      }
+    },
+    {
+      "new_path": "rlinf/models/embodiment/openpi/policies/geniesim_policy.py",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_a498a92b260664",
+            "lines": 144
+          },
+          {
+            "session_id": "s_d76b7032adc3a2",
+            "lines": 9
+          }
+        ]
+      }
+    },
+    {
+      "new_path": "tests/e2e_tests/embodied/geniesim_ppo_openpi_pi05.yaml",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_d76b7032adc3a2",
+            "lines": 145
+          }
+        ]
+      }
+    },
+    {
+      "new_path": "tests/unit_tests/test_geniesim_env.py",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_65f3742149cf7e",
+            "lines": 2
+          },
+          {
+            "session_id": "s_88a4987e11b071",
+            "lines": 4
+          },
+          {
+            "session_id": "s_a498a92b260664",
+            "lines": 282
+          },
+          {
+            "session_id": "s_d76b7032adc3a2",
+            "lines": 386
+          }
+        ]
+      }
+    },
+    {
+      "old_path": "docker/Dockerfile",
+      "new_path": "docker/Dockerfile",
+      "additions": {
+        "human": 2,
+        "ai": [
+          {
+            "session_id": "s_9e9026574b6cf0",
+            "lines": 20
+          }
+        ]
+      }
+    },
+    {
+      "old_path": "docker/README.md",
+      "new_path": "docker/README.md",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_9e9026574b6cf0",
+            "lines": 5
+          }
+        ]
+      }
+    },
+    {
+      "old_path": "docs/source-en/_static/css/custom.css",
+      "new_path": "docs/source-en/_static/css/custom.css",
+      "additions": {
+        "human": 21
+      }
+    },
+    {
+      "old_path": "docs/source-en/rst_source/examples/simulators_index.rst",
+      "new_path": "docs/source-en/rst_source/examples/simulators_index.rst",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_a498a92b260664",
+            "lines": 14
+          }
+        ]
+      }
+    },
+    {
+      "old_path": "docs/source-zh/_static/css/custom.css",
+      "new_path": "docs/source-zh/_static/css/custom.css",
+      "additions": {
+        "human": 21
+      }
+    },
+    {
+      "old_path": "docs/source-zh/rst_source/examples/simulators_index.rst",
+      "new_path": "docs/source-zh/rst_source/examples/simulators_index.rst",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_a498a92b260664",
+            "lines": 14
+          }
+        ]
+      }
+    },
+    {
+      "old_path": "evaluations/run_eval.sh",
+      "new_path": "evaluations/run_eval.sh",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_a498a92b260664",
+            "lines": 1
+          }
+        ]
+      }
+    },
+    {
+      "old_path": "requirements/install.sh",
+      "new_path": "requirements/install.sh",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_9e9026574b6cf0",
+            "lines": 15
+          },
+          {
+            "session_id": "s_a498a92b260664",
+            "lines": 1
+          },
+          {
+            "session_id": "s_d76b7032adc3a2",
+            "lines": 6
+          }
+        ]
+      },
+      "deletions": {
+        "human": 1
+      }
+    },
+    {
+      "old_path": "rlinf/envs/__init__.py",
+      "new_path": "rlinf/envs/__init__.py",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_a498a92b260664",
+            "lines": 5
+          }
+        ]
+      }
+    },
+    {
+      "old_path": "rlinf/envs/action_utils.py",
+      "new_path": "rlinf/envs/action_utils.py",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_a498a92b260664",
+            "lines": 5
+          }
+        ]
+      }
+    },
+    {
+      "old_path": "rlinf/models/embodiment/openpi/dataconfig/__init__.py",
+      "new_path": "rlinf/models/embodiment/openpi/dataconfig/__init__.py",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_a498a92b260664",
+            "lines": 12
+          }
+        ]
+      }
+    }
+  ]
+}
