@@ -1,0 +1,19 @@
+---
+{
+  "schema_version": "authorship/3.1.0",
+  "tlab_version": "0.13.1",
+  "base_commit_sha": "98279cefe6d4535d796a43bbe2d830892196b2f6",
+  "prompts": {},
+  "changes": [
+    {
+      "old_path": "examples/embodiment/config/geniesim_multitask10_ppo_openpi_pi05.yaml",
+      "new_path": "examples/embodiment/config/geniesim_multitask10_ppo_openpi_pi05.yaml",
+      "additions": {
+        "human": 1
+      },
+      "deletions": {
+        "human": 1
+      }
+    }
+  ]
+}
