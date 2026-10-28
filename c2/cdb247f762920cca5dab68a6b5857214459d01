@@ -1,0 +1,29 @@
+---
+{
+  "schema_version": "authorship/3.1.0",
+  "tlab_version": "0.13.1",
+  "base_commit_sha": "c2cdb247f762920cca5dab68a6b5857214459d01",
+  "prompts": {},
+  "changes": [
+    {
+      "old_path": "docs/source-en/rst_source/examples/embodied/geniesim.rst",
+      "new_path": "docs/source-en/rst_source/examples/embodied/geniesim.rst",
+      "additions": {
+        "human": 48
+      },
+      "deletions": {
+        "human": 5
+      }
+    },
+    {
+      "old_path": "docs/source-zh/rst_source/examples/embodied/geniesim.rst",
+      "new_path": "docs/source-zh/rst_source/examples/embodied/geniesim.rst",
+      "additions": {
+        "human": 41
+      },
+      "deletions": {
+        "human": 2
+      }
+    }
+  ]
+}
