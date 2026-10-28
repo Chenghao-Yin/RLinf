@@ -1,0 +1,69 @@
+---
+{
+  "schema_version": "authorship/3.1.0",
+  "tlab_version": "0.13.1",
+  "base_commit_sha": "a05d05d2e7f366d8ead34775e95a2f9815caa2c5",
+  "prompts": {},
+  "sessions": {
+    "s_a498a92b260664": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "s_a498a92b260664",
+        "model": "unknown"
+      },
+      "human_author": "yongxin.su <3305068309@qq.com>"
+    },
+    "s_a82621499db4ad": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "56c24dcf-ba34-46d0-9c7c-53efac749cbc",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Jonas.Lin 林奕仁 <jonaslin@agibot.com>",
+      "custom_attributes": {
+        "tlab.session_started_at": "2026-10-27T13:43:34Z",
+        "tlab.token_usage.input_tokens": "12878",
+        "tlab.token_usage.cache_creation_tokens": "997308",
+        "tlab.token_usage.cache_read_tokens": "29485738",
+        "tlab.token_usage.output_tokens": "131404"
+      }
+    },
+    "s_d76b7032adc3a2": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a16da4-d495-7fe0-a7d6-6d2564d56edf",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Jonas.Lin 林奕仁 <jonaslin@agibot.com>",
+      "custom_attributes": {
+        "tlab.token_usage.output_tokens": "166457",
+        "tlab.token_usage.cache_read_tokens": "28593280",
+        "tlab.token_usage.cache_creation_tokens": "0",
+        "tlab.session_started_at": "2026-10-25T07:14:47Z",
+        "tlab.token_usage.input_tokens": "995397"
+      }
+    }
+  },
+  "changes": [
+    {
+      "old_path": "examples/embodiment/config/geniesim_pick_block_color_grpo_openpi_pi05.yaml",
+      "new_path": "examples/embodiment/config/geniesim_pick_block_color_grpo_openpi_pi05.yaml",
+      "additions": {
+        "human": 4
+      },
+      "deletions": {
+        "human": 4
+      }
+    },
+    {
+      "old_path": "examples/embodiment/config/geniesim_pick_block_color_ppo_openpi_pi05.yaml",
+      "new_path": "examples/embodiment/config/geniesim_pick_block_color_ppo_openpi_pi05.yaml",
+      "additions": {
+        "human": 2
+      },
+      "deletions": {
+        "human": 2
+      }
+    }
+  ]
+}
