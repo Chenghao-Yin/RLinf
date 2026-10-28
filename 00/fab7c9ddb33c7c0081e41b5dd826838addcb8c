@@ -1,0 +1,59 @@
+---
+{
+  "schema_version": "authorship/3.1.0",
+  "tlab_version": "0.13.1",
+  "base_commit_sha": "00fab7c9ddb33c7c0081e41b5dd826838addcb8c",
+  "prompts": {},
+  "changes": [
+    {
+      "old_path": "examples/embodiment/config/geniesim_multitask10_ppo_openpi_pi05.yaml",
+      "new_path": "examples/embodiment/config/geniesim_multitask10_ppo_openpi_pi05.yaml",
+      "additions": {
+        "human": 53
+      },
+      "deletions": {
+        "human": 21
+      }
+    },
+    {
+      "old_path": "examples/embodiment/config/geniesim_multitask4_ppo_openpi_pi05.yaml",
+      "new_path": "examples/embodiment/config/geniesim_multitask4_ppo_openpi_pi05.yaml",
+      "additions": {
+        "human": 28
+      },
+      "deletions": {
+        "human": 12
+      }
+    },
+    {
+      "old_path": "examples/embodiment/config/geniesim_multitask6_ppo_openpi_pi05.yaml",
+      "new_path": "examples/embodiment/config/geniesim_multitask6_ppo_openpi_pi05.yaml",
+      "additions": {
+        "human": 31
+      },
+      "deletions": {
+        "human": 11
+      }
+    },
+    {
+      "old_path": "examples/embodiment/config/geniesim_pick_block_color_grpo_openpi_pi05.yaml",
+      "new_path": "examples/embodiment/config/geniesim_pick_block_color_grpo_openpi_pi05.yaml",
+      "additions": {
+        "human": 19
+      },
+      "deletions": {
+        "human": 7
+      }
+    },
+    {
+      "old_path": "examples/embodiment/config/geniesim_pick_block_color_ppo_openpi_pi05.yaml",
+      "new_path": "examples/embodiment/config/geniesim_pick_block_color_ppo_openpi_pi05.yaml",
+      "additions": {
+        "human": 12
+      },
+      "deletions": {
+        "human": 5
+      }
+    }
+  ]
+}
