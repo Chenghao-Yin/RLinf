@@ -4,6 +4,24 @@
   "tlab_version": "0.13.1",
   "base_commit_sha": "59239c29ab6a033331b966d0a1faf6aaedf0f1b8",
   "prompts": {},
+  "sessions": {
+    "s_88a4987e11b071": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a16da4-d495-7fe0-a7d6-6d2564d56edf",
+        "model": "unknown"
+      },
+      "human_author": "Jonas.Lin 林奕仁 <jonaslin@agibot.com>"
+    },
+    "s_d76b7032adc3a2": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a16da4-d495-7fe0-a7d6-6d2564d56edf",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Jonas.Lin 林奕仁 <jonaslin@agibot.com>"
+    }
+  },
   "changes": [
     {
       "old_path": "docs/source-en/rst_source/examples/embodied/geniesim.rst",
