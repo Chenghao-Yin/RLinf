@@ -1,0 +1,39 @@
+---
+{
+  "schema_version": "authorship/3.1.0",
+  "tlab_version": "0.13.1",
+  "base_commit_sha": "0468822e5cf73ceb00c11264769f40321797c4f9",
+  "prompts": {},
+  "changes": [
+    {
+      "new_path": "examples/embodiment/config/geniesim_multitask10_ppo_openpi_pi05.yaml",
+      "additions": {
+        "human": 221
+      }
+    },
+    {
+      "new_path": "examples/embodiment/config/geniesim_multitask4_ppo_openpi_pi05.yaml",
+      "additions": {
+        "human": 195
+      }
+    },
+    {
+      "new_path": "examples/embodiment/config/geniesim_multitask6_ppo_openpi_pi05.yaml",
+      "additions": {
+        "human": 201
+      }
+    },
+    {
+      "new_path": "examples/embodiment/config/geniesim_pick_block_color_grpo_openpi_pi05.yaml",
+      "additions": {
+        "human": 168
+      }
+    },
+    {
+      "new_path": "examples/embodiment/config/geniesim_pick_block_color_ppo_openpi_pi05.yaml",
+      "additions": {
+        "human": 171
+      }
+    }
+  ]
+}
