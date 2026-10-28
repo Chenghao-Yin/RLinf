@@ -1,0 +1,466 @@
+docs/source-zh/rst_source/examples/simulators_index.rst
+  s_a82621499db4ad::t_1fe4fa3cda37e6 185
+docker/Dockerfile
+  s_a82621499db4ad::t_a3919eacfad44e 527,529
+rlinf/envs/sim/geniesim/geniesim_env.py
+  s_a82621499db4ad::t_f231a97d7d77e3 531
+  s_a82621499db4ad::t_c184f3f6bb3b7f 547-548
+  s_a82621499db4ad::t_584956a2c262b9 797-799
+  s_a82621499db4ad::t_94056b4947bddc 565
+  s_a82621499db4ad::t_986dc36a0b901f 576,578,582
+  s_a82621499db4ad::t_f5b0acb6dbe0e6 618
+  s_a82621499db4ad::t_9bb1c30f5fb49d 619-624
+  s_a82621499db4ad::t_779dffcf4a8141 670-672,677,683-702
+  s_a82621499db4ad::t_1b0f06fbf4049c 703
+  s_a82621499db4ad::t_53262babcf2254 198-199
+evaluations/geniesim/geniesim_pick_block_color_eval.yaml
+  s_a82621499db4ad::t_242145184e4fc7 7,72-76,79
+tests/unit_tests/test_geniesim_env.py
+  s_a82621499db4ad::t_b43bd706ff2f19 421-426,428-439
+requirements/install.sh
+  s_a82621499db4ad::t_348bcd00b1c08f 3492,3494
+  s_a82621499db4ad::t_4c61a6c74d2a24 3493
+examples/embodiment/config/geniesim_multitask4_ppo_openpi_pi05.yaml
+  s_a82621499db4ad::t_242145184e4fc7 14,158-160,162-163,165
+examples/embodiment/config/geniesim_pick_block_color_ppo_openpi_pi05.yaml
+  s_a82621499db4ad::t_242145184e4fc7 5,132-134,136-137,139
+examples/embodiment/config/geniesim_multitask6_ppo_openpi_pi05.yaml
+  s_a82621499db4ad::t_242145184e4fc7 14,166-168,170-171,173
+docs/source-en/rst_source/examples/simulators_index.rst
+  s_a82621499db4ad::t_1fe4fa3cda37e6 185
+examples/embodiment/config/geniesim_pick_block_color_grpo_openpi_pi05.yaml
+  s_a82621499db4ad::t_242145184e4fc7 5,129-135
+docs/source-en/rst_source/examples/embodied/geniesim.rst
+  s_a82621499db4ad::t_1fe4fa3cda37e6 6
+  s_a82621499db4ad::t_d48b081ebc23b4 120-122,139,214
+  s_a82621499db4ad::t_38b31816524a1d 408,414
+  s_a82621499db4ad::t_243ce4968f69c3 409-413
+examples/embodiment/config/geniesim_multitask10_ppo_openpi_pi05.yaml
+  s_a82621499db4ad::t_242145184e4fc7 16,192-194,196-197,199
+docs/source-zh/rst_source/examples/embodied/geniesim.rst
+  s_a82621499db4ad::t_d48b081ebc23b4 100,114,172
+  s_a82621499db4ad::t_243ce4968f69c3 341
+  s_a82621499db4ad::t_38b31816524a1d 342
+  s_a82621499db4ad::t_1fe4fa3cda37e6 6
+---
+{
+  "schema_version": "authorship/3.1.0",
+  "tlab_version": "0.13.1",
+  "base_commit_sha": "b382727556d963f686b37af55b533a7de077d192",
+  "prompts": {},
+  "sessions": {
+    "s_4d245cbd2e3210": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a15831-50ed-7fb0-bf1e-88b826c27efe",
+        "model": "unknown"
+      },
+      "human_author": "Jonas.Lin 林奕仁 <jonaslin@agibot.com>",
+      "custom_attributes": {
+        "tlab.token_usage.input_tokens": "0",
+        "tlab.token_usage.cache_read_tokens": "0",
+        "tlab.session_started_at": "2026-10-25T13:59:00Z",
+        "tlab.token_usage.cache_creation_tokens": "0",
+        "tlab.token_usage.output_tokens": "0"
+      }
+    },
+    "s_65f3742149cf7e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a15831-50ed-7fb0-bf1e-88b826c27efe",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Jonas.Lin 林奕仁 <jonaslin@agibot.com>",
+      "custom_attributes": {
+        "tlab.session_started_at": "2026-10-25T13:57:38Z",
+        "tlab.token_usage.output_tokens": "1615178",
+        "tlab.token_usage.cache_read_tokens": "342577280",
+        "tlab.token_usage.cache_creation_tokens": "0",
+        "tlab.token_usage.input_tokens": "7191353"
+      }
+    },
+    "s_88a4987e11b071": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a16da4-d495-7fe0-a7d6-6d2564d56edf",
+        "model": "unknown"
+      },
+      "human_author": "Jonas.Lin 林奕仁 <jonaslin@agibot.com>"
+    },
+    "s_9e9026574b6cf0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a15dcb-c6fd-7e61-ba03-c09139d4bbf5",
+        "model": "gpt-6-sol"
+      },
+      "human_author": null
+    },
+    "s_a498a92b260664": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "s_a498a92b260664",
+        "model": "unknown"
+      },
+      "human_author": "yongxin.su <3305068309@qq.com>"
+    },
+    "s_a82621499db4ad": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "56c24dcf-ba34-46d0-9c7c-53efac749cbc",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Jonas.Lin 林奕仁 <jonaslin@agibot.com>",
+      "custom_attributes": {
+        "tlab.token_usage.input_tokens": "12878",
+        "tlab.token_usage.cache_creation_tokens": "997308",
+        "tlab.token_usage.cache_read_tokens": "29485738",
+        "tlab.session_started_at": "2026-10-27T13:43:34Z",
+        "tlab.token_usage.output_tokens": "131404"
+      }
+    },
+    "s_d76b7032adc3a2": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a16da4-d495-7fe0-a7d6-6d2564d56edf",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Jonas.Lin 林奕仁 <jonaslin@agibot.com>"
+    },
+    "s_f9bbf76430cd77": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a171b9-9d29-7f90-aabd-5b6013f4fb2f",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "yongxin.su <3305068309@qq.com>",
+      "custom_attributes": {
+        "tlab.token_usage.input_tokens": "346649",
+        "tlab.session_started_at": "2026-10-25T09:33:15Z",
+        "tlab.token_usage.output_tokens": "98866",
+        "tlab.token_usage.cache_creation_tokens": "0",
+        "tlab.token_usage.cache_read_tokens": "63441152"
+      }
+    }
+  },
+  "changes": [
+    {
+      "old_path": "docker/Dockerfile",
+      "new_path": "docker/Dockerfile",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_a82621499db4ad",
+            "lines": 2
+          }
+        ]
+      },
+      "deletions": {
+        "ai": [
+          {
+            "session_id": "s_a82621499db4ad",
+            "lines": 5
+          }
+        ]
+      }
+    },
+    {
+      "old_path": "docs/source-en/rst_source/examples/embodied/geniesim.rst",
+      "new_path": "docs/source-en/rst_source/examples/embodied/geniesim.rst",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_a82621499db4ad",
+            "lines": 13
+          }
+        ]
+      },
+      "deletions": {
+        "human": 1,
+        "ai": [
+          {
+            "session_id": "s_a82621499db4ad",
+            "lines": 13
+          }
+        ]
+      }
+    },
+    {
+      "old_path": "docs/source-en/rst_source/examples/simulators_index.rst",
+      "new_path": "docs/source-en/rst_source/examples/simulators_index.rst",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_a82621499db4ad",
+            "lines": 1
+          }
+        ]
+      },
+      "deletions": {
+        "ai": [
+          {
+            "session_id": "s_a82621499db4ad",
+            "lines": 1
+          }
+        ]
+      }
+    },
+    {
+      "old_path": "docs/source-zh/rst_source/examples/embodied/geniesim.rst",
+      "new_path": "docs/source-zh/rst_source/examples/embodied/geniesim.rst",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_a82621499db4ad",
+            "lines": 6
+          }
+        ]
+      },
+      "deletions": {
+        "human": 3,
+        "ai": [
+          {
+            "session_id": "s_a82621499db4ad",
+            "lines": 9
+          }
+        ]
+      }
+    },
+    {
+      "old_path": "docs/source-zh/rst_source/examples/simulators_index.rst",
+      "new_path": "docs/source-zh/rst_source/examples/simulators_index.rst",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_a82621499db4ad",
+            "lines": 1
+          }
+        ]
+      },
+      "deletions": {
+        "ai": [
+          {
+            "session_id": "s_a82621499db4ad",
+            "lines": 1
+          }
+        ]
+      }
+    },
+    {
+      "old_path": "evaluations/geniesim/geniesim_pick_block_color_eval.yaml",
+      "new_path": "evaluations/geniesim/geniesim_pick_block_color_eval.yaml",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_a82621499db4ad",
+            "lines": 7
+          }
+        ]
+      },
+      "deletions": {
+        "ai": [
+          {
+            "session_id": "s_a82621499db4ad",
+            "lines": 7
+          }
+        ]
+      }
+    },
+    {
+      "old_path": "examples/embodiment/config/env/geniesim.yaml",
+      "new_path": "examples/embodiment/config/env/geniesim.yaml",
+      "deletions": {
+        "ai": [
+          {
+            "session_id": "s_a82621499db4ad",
+            "lines": 3
+          }
+        ]
+      }
+    },
+    {
+      "old_path": "examples/embodiment/config/geniesim_multitask10_ppo_openpi_pi05.yaml",
+      "new_path": "examples/embodiment/config/geniesim_multitask10_ppo_openpi_pi05.yaml",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_a82621499db4ad",
+            "lines": 7
+          }
+        ]
+      },
+      "deletions": {
+        "ai": [
+          {
+            "session_id": "s_a82621499db4ad",
+            "lines": 10
+          }
+        ]
+      }
+    },
+    {
+      "old_path": "examples/embodiment/config/geniesim_multitask4_ppo_openpi_pi05.yaml",
+      "new_path": "examples/embodiment/config/geniesim_multitask4_ppo_openpi_pi05.yaml",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_a82621499db4ad",
+            "lines": 7
+          }
+        ]
+      },
+      "deletions": {
+        "ai": [
+          {
+            "session_id": "s_a82621499db4ad",
+            "lines": 9
+          }
+        ]
+      }
+    },
+    {
+      "old_path": "examples/embodiment/config/geniesim_multitask6_ppo_openpi_pi05.yaml",
+      "new_path": "examples/embodiment/config/geniesim_multitask6_ppo_openpi_pi05.yaml",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_a82621499db4ad",
+            "lines": 7
+          }
+        ]
+      },
+      "deletions": {
+        "ai": [
+          {
+            "session_id": "s_a82621499db4ad",
+            "lines": 9
+          }
+        ]
+      }
+    },
+    {
+      "old_path": "examples/embodiment/config/geniesim_pick_block_color_grpo_openpi_pi05.yaml",
+      "new_path": "examples/embodiment/config/geniesim_pick_block_color_grpo_openpi_pi05.yaml",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_a82621499db4ad",
+            "lines": 8
+          }
+        ]
+      },
+      "deletions": {
+        "human": 2,
+        "ai": [
+          {
+            "session_id": "s_a82621499db4ad",
+            "lines": 13
+          }
+        ]
+      }
+    },
+    {
+      "old_path": "examples/embodiment/config/geniesim_pick_block_color_ppo_openpi_pi05.yaml",
+      "new_path": "examples/embodiment/config/geniesim_pick_block_color_ppo_openpi_pi05.yaml",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_a82621499db4ad",
+            "lines": 7
+          }
+        ]
+      },
+      "deletions": {
+        "ai": [
+          {
+            "session_id": "s_a82621499db4ad",
+            "lines": 10
+          }
+        ]
+      }
+    },
+    {
+      "old_path": "examples/embodiment/config/model/pi0_5_geniesim.yaml",
+      "deletions": {
+        "ai": [
+          {
+            "session_id": "s_a82621499db4ad",
+            "lines": 51
+          }
+        ]
+      }
+    },
+    {
+      "old_path": "requirements/install.sh",
+      "new_path": "requirements/install.sh",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_a82621499db4ad",
+            "lines": 3
+          }
+        ]
+      },
+      "deletions": {
+        "ai": [
+          {
+            "session_id": "s_a82621499db4ad",
+            "lines": 6
+          }
+        ]
+      }
+    },
+    {
+      "old_path": "rlinf/envs/sim/geniesim/geniesim_env.py",
+      "new_path": "rlinf/envs/sim/geniesim/geniesim_env.py",
+      "additions": {
+        "human": 3,
+        "ai": [
+          {
+            "session_id": "s_a82621499db4ad",
+            "lines": 41
+          }
+        ]
+      },
+      "deletions": {
+        "human": 13,
+        "ai": [
+          {
+            "session_id": "s_a82621499db4ad",
+            "lines": 285
+          }
+        ]
+      }
+    },
+    {
+      "old_path": "tests/e2e_tests/embodied/geniesim_ppo_openpi_pi05.yaml",
+      "deletions": {
+        "ai": [
+          {
+            "session_id": "s_a82621499db4ad",
+            "lines": 145
+          }
+        ]
+      }
+    },
+    {
+      "old_path": "tests/unit_tests/test_geniesim_env.py",
+      "new_path": "tests/unit_tests/test_geniesim_env.py",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_a82621499db4ad",
+            "lines": 18
+          }
+        ]
+      },
+      "deletions": {
+        "ai": [
+          {
+            "session_id": "s_a82621499db4ad",
+            "lines": 23
+          }
+        ]
+      }
+    }
+  ]
+}
