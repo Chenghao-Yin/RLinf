@@ -1,0 +1,102 @@
+docs/source-zh/_static/css/custom.css
+  s_a82621499db4ad::t_3b485b49f8226c 576-578
+docs/source-zh/rst_source/examples/embodied/geniesim.rst
+  s_a82621499db4ad::t_575e93d62cb421 320,327,334,348
+  s_a82621499db4ad::t_c96d941b16d448 146,160
+docs/source-en/_static/css/custom.css
+  s_a82621499db4ad::t_3b485b49f8226c 576-578
+docs/source-en/rst_source/examples/embodied/geniesim.rst
+  s_a82621499db4ad::t_575e93d62cb421 391,398,405,419
+  s_a82621499db4ad::t_e7a4f62cc3c51a 174-175,196
+---
+{
+  "schema_version": "authorship/3.1.0",
+  "tlab_version": "0.14.2",
+  "base_commit_sha": "6f5e62799cc8c8385197f3b5c5b117d175f000e2",
+  "prompts": {},
+  "sessions": {
+    "s_a82621499db4ad": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "56c24dcf-ba34-46d0-9c7c-53efac749cbc",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Jonas.Lin 林奕仁 <jonaslin@agibot.com>",
+      "custom_attributes": {
+        "tlab.token_usage.output_tokens": "225054",
+        "tlab.token_usage.input_tokens": "16225",
+        "tlab.session_started_at": "2026-10-30T12:18:54Z",
+        "tlab.token_usage.cache_read_tokens": "88919517",
+        "tlab.token_usage.cache_creation_tokens": "6779497"
+      }
+    }
+  },
+  "changes": [
+    {
+      "old_path": "docs/source-en/_static/css/custom.css",
+      "new_path": "docs/source-en/_static/css/custom.css",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_a82621499db4ad",
+            "lines": 3
+          }
+        ]
+      }
+    },
+    {
+      "old_path": "docs/source-en/rst_source/examples/embodied/geniesim.rst",
+      "new_path": "docs/source-en/rst_source/examples/embodied/geniesim.rst",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_a82621499db4ad",
+            "lines": 7
+          }
+        ]
+      },
+      "deletions": {
+        "human": 5,
+        "ai": [
+          {
+            "session_id": "s_a82621499db4ad",
+            "lines": 4
+          }
+        ]
+      }
+    },
+    {
+      "old_path": "docs/source-zh/_static/css/custom.css",
+      "new_path": "docs/source-zh/_static/css/custom.css",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_a82621499db4ad",
+            "lines": 3
+          }
+        ]
+      }
+    },
+    {
+      "old_path": "docs/source-zh/rst_source/examples/embodied/geniesim.rst",
+      "new_path": "docs/source-zh/rst_source/examples/embodied/geniesim.rst",
+      "additions": {
+        "ai": [
+          {
+            "session_id": "s_a82621499db4ad",
+            "lines": 6
+          }
+        ]
+      },
+      "deletions": {
+        "human": 4,
+        "ai": [
+          {
+            "session_id": "s_a82621499db4ad",
+            "lines": 4
+          }
+        ]
+      }
+    }
+  ]
+}
