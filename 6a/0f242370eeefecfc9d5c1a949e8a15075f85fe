@@ -1,0 +1,443 @@
+docs/source-zh/rst_source/evaluations/reference/models.rst
+  s_a82621499db4ad::t_2a3aad37a4e667 31,34-36
+tests/unit_tests/test_placement.py
+  s_a82621499db4ad::t_2a3aad37a4e667 86-101,779-780,782-985,987-1158,1533
+  s_a82621499db4ad::t_d9e2c956911b79 85
+rlinf/config.py
+  s_a82621499db4ad::t_2a3aad37a4e667 18,97,115,146,162,289-302,552-559,985-1095,1200-1248,1250-1258,1260,1266-1341,1353-1355,1419-1450,1486-1496,1565-1586
+rlinf/workers/actor/fsdp_actor_worker.py
+  s_a82621499db4ad::t_2a3aad37a4e667 27,73-76,199-204,208-210,720-724
+rlinf/envs/sim/simple/runtime.py
+  s_a82621499db4ad::t_2a3aad37a4e667 1-195
+rlinf/runners/agent_eval_runner.py
+  s_a82621499db4ad::t_2a3aad37a4e667 103-109,216
+docs/source-zh/rst_source/examples/embodied/wan.rst
+  s_a82621499db4ad::t_2a3aad37a4e667 261
+rlinf/models/embodiment/psi0/psi0_processing.py
+  s_a82621499db4ad::t_2a3aad37a4e667 1-161
+examples/embodiment/config/robocasa_closedrawer_ppo_openpi.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 152
+examples/embodiment/config/calvin_d_d_ppo_openpi_pi05.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 142
+docs/source-en/rst_source/examples/embodied/wan.rst
+  s_a82621499db4ad::t_2a3aad37a4e667 265
+docs/source-en/rst_source/examples/embodied/lingbotvlav2.rst
+  s_a82621499db4ad::t_2a3aad37a4e667 1-278
+examples/agent/searchr1/train.py
+  s_a82621499db4ad::t_2a3aad37a4e667 78-79
+rlinf/runners/agent_runner.py
+  s_a82621499db4ad::t_2a3aad37a4e667 113-119,178,274,281,326-327
+examples/embodiment/config/hybrid_engines/phyai.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 1-52
+docs/source-zh/rst_source/reference/algorithms/ppo.rst
+  s_a82621499db4ad::t_2a3aad37a4e667 106-121
+rlinf/workers/rollout/apxinf/apxinf_worker.py
+  s_a82621499db4ad::t_2a3aad37a4e667 99-105,117,130-132,144-145
+  s_a82621499db4ad::t_65ac8e22761ef1 146
+requirements/embodied/models/gr00t_n1d6.txt
+  s_a82621499db4ad::t_2a3aad37a4e667 1-3
+docs/source-en/rst_source/examples/embodied/psi0.rst
+  s_a82621499db4ad::t_2a3aad37a4e667 1-244
+tests/e2e_tests/embodied/maniskill_async_ppo_openpi_pi05_musa.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 158
+tests/unit_tests/test_fsdp.py
+  s_a82621499db4ad::t_2a3aad37a4e667 41-45,257-301,360,362,374,396,424-435,1116-1225
+tests/unit_tests/test_real_env.py
+  s_a82621499db4ad::t_2a3aad37a4e667 4833-4869
+rlinf/envs/sim/simple/__init__.py
+  s_a82621499db4ad::t_2a3aad37a4e667 15,17-18,20
+examples/embodiment/config/maniskill_ppo_openpi.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 150
+tests/e2e_tests/embodied/calvin_ppo_openpi.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 131
+tests/e2e_tests/embodied/behavior_ppo_openpi.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 135
+tests/e2e_tests/embodied/libero_object_nft_openpi.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 130
+rlinf/workers/rollout/phyai/__init__.py
+  s_a82621499db4ad::t_2a3aad37a4e667 1-17
+requirements/embodied/download_assets.sh
+  s_a82621499db4ad::t_2a3aad37a4e667 6,29-30,138-180,242-243
+  s_a82621499db4ad::t_61d7421fc7ed9c 244
+docs/source-zh/rst_source/evaluations/guides/robotwin.rst
+  s_a82621499db4ad::t_2a3aad37a4e667 18,84,87-90,206,212-217
+  s_a82621499db4ad::t_49010496c19dfa 218
+docs/source-zh/rst_source/examples/embodied/lingbotvla.rst
+  s_a82621499db4ad::t_2a3aad37a4e667 1,13,15,22,48,128,151,181,220,290,301,314,335
+docs/source-zh/rst_source/evaluations/guides/index.rst
+  s_a82621499db4ad::t_2a3aad37a4e667 31-33,49
+examples/embodiment/config/libero_object_ppo_openpi_pi05.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 136
+docs/source-zh/rst_source/evaluations/index.rst
+  s_a82621499db4ad::t_2a3aad37a4e667 38-40,85-86
+examples/embodiment/config/realworld_dual_franka_collect_data_pico.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 49-50,53-57
+docs/source-zh/_static/versions.json
+  s_a82621499db4ad::t_2a3aad37a4e667 21-25
+rlinf/hybrid_engines/fsdp/utils.py
+  s_a82621499db4ad::t_2a3aad37a4e667 774,788
+docs/source-en/rst_source/evaluations/get_started/installation.rst
+  s_a82621499db4ad::t_2a3aad37a4e667 27
+examples/embodiment/config/libero_goal_ppo_openpi.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 136
+docs/source-zh/rst_source/evaluations/get_started/installation.rst
+  s_a82621499db4ad::t_2a3aad37a4e667 27
+examples/embodiment/config/libero_object_ppo_openpi.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 134
+rlinf/models/__init__.py
+  s_a82621499db4ad::t_2a3aad37a4e667 77-81,132-136,226-231,292-294
+  s_a82621499db4ad::t_15adb6a1ec09bd 295-297
+rlinf/utils/placement.py
+  s_a82621499db4ad::t_2a3aad37a4e667 16,18,25,88-245,289-292,305-312,387-402,460-505,521-523,533,580-585,587-590,760-762,768-818,887-890,911-921,926-927,931,960-962,968-1006
+  s_a82621499db4ad::t_2d80cd1e175684 1007
+docs/source-en/rst_source/examples/vla_wam_index.rst
+  s_a82621499db4ad::t_2a3aad37a4e667 133,136-137,139,165-175,190,193
+rlinf/algorithms/losses.py
+  s_a82621499db4ad::t_2a3aad37a4e667 20,195-196,212-215,258-300,420
+examples/agent/searchr1/eval.py
+  s_a82621499db4ad::t_2a3aad37a4e667 66-67
+rlinf/data/schema/embodied_types.py
+  s_a82621499db4ad::t_2a3aad37a4e667 148-149,169,179-183,695-696,723-734,1723,1730-1732
+examples/embodiment/config/calvin_d_d_ppo_openpi.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 137
+docs/source-en/rst_source/resources/maintainer_policy.rst
+  s_a82621499db4ad::t_2a3aad37a4e667 128-129,135,144,153-155,366
+rlinf/workers/rollout/sglang/server_worker.py
+  s_a82621499db4ad::t_2a3aad37a4e667 1-102
+docs/source-en/rst_source/evaluations/index.rst
+  s_a82621499db4ad::t_2a3aad37a4e667 38-40,85-86
+docs/source-zh/rst_source/examples/embodied/dual_franka_pico_dagger.rst
+  s_a82621499db4ad::t_2a3aad37a4e667 311
+examples/embodiment/config/libero_object_async_ppo_openpi_pi05.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 139
+examples/embodiment/config/libero_spatial_grpo_openpi.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 129
+examples/embodiment/config/libero_spatial_ppo_openpi.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 138
+examples/embodiment/config/libero_10_grpo_openpi_pi05.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 128
+examples/embodiment/config/libero_10_grpo_openpi.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 136
+rlinf/workers/rollout/phyai/phyai_rollout_worker.py
+  s_a82621499db4ad::t_2a3aad37a4e667 1-1139
+examples/embodiment/config/metaworld_50_ppo_openpi.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 134
+rlinf/envs/action_utils.py
+  s_a82621499db4ad::t_2a3aad37a4e667 329-344,457-458
+docs/source-en/rst_source/evaluations/reference/models.rst
+  s_a82621499db4ad::t_2a3aad37a4e667 31,34-36
+tests/e2e_tests/embodied/robocasa_closedrawer_ppo_openpi.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 144
+docs/source-zh/rst_source/guides/rollout-engines/phyai.rst
+  s_a82621499db4ad::t_2a3aad37a4e667 1-97
+tests/e2e_tests/embodied/libero_spatial_ppo_openpi_pi05_phyai_ci.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 1-163
+rlinf/scheduler/dynamic_scheduler/manager.py
+  s_a82621499db4ad::t_2a3aad37a4e667 83-90
+toolkits/auto_placement/util.py
+  s_a82621499db4ad::t_2a3aad37a4e667 45-50
+examples/embodiment/config/robotwin_adjust_bottle_ppo_openpi_pi05.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 169
+rlinf/envs/sim/simple/utils.py
+  s_a82621499db4ad::t_2a3aad37a4e667 1-71
+rlinf/workers/env/env_worker.py
+  s_a82621499db4ad::t_2a3aad37a4e667 160-164,497-500,574-579,1291,1321-1341,1363-1364
+  s_a82621499db4ad::t_8fbb71890eed2a 1365
+examples/embodiment/config/libero_spatial_ppo_openpi_quickstart.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 134
+docs/source-en/rst_source/examples/embodied/sft_openpi.rst
+  s_a82621499db4ad::t_2a3aad37a4e667 120-126
+.github/workflows/embodied-e2e-tests.yml
+  s_a82621499db4ad::t_2a3aad37a4e667 412-415,427,1374-1423,2044,2073,2197-2266,2268-2272
+  s_a82621499db4ad::t_90c90148ebae8f 2267
+docs/source-en/rst_source/guides/sglang_server.rst
+  s_a82621499db4ad::t_2a3aad37a4e667 73,195,228,327
+docs/source-zh/rst_source/examples/embodied/lingbotvlav2.rst
+  s_a82621499db4ad::t_2a3aad37a4e667 1-243
+docs/source-zh/rst_source/examples/vla_wam_index.rst
+  s_a82621499db4ad::t_2a3aad37a4e667 129,132-133,135,161-171,186,189
+rlinf/workers/rollout/sglang/rendezvous.py
+  s_a82621499db4ad::t_2a3aad37a4e667 1-379
+docs/source-en/_static/versions.json
+  s_a82621499db4ad::t_2a3aad37a4e667 21-25
+docs/source-zh/rst_source/guides/rollout-engines/index.rst
+  s_a82621499db4ad::t_2a3aad37a4e667 23-24,33
+rlinf/models/embodiment/psi0/psi0_action_model.py
+  s_a82621499db4ad::t_2a3aad37a4e667 1-557
+.github/workflows/ci-tests.yml
+  s_a82621499db4ad::t_2a3aad37a4e667 60
+examples/embodiment/config/isaaclab_franka_stack_cube_ppo_openpi_pi05.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 142
+examples/embodiment/config/maniskill_ppo_openpi_pi05.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 147
+tests/e2e_tests/embodied/libero_10_ppo_openpi_pi05_metax.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 137
+examples/embodiment/config/maniskill_async_ppo_openpi_pi05.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 147
+docs/source-en/rst_source/evaluations/guides/index.rst
+  s_a82621499db4ad::t_2a3aad37a4e667 31-33,49
+requirements/embodied/models/lingbotvlav2.txt
+  s_a82621499db4ad::t_2a3aad37a4e667 1-18
+examples/embodiment/config/metaworld_50_ppo_openpi_pi05.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 139
+tests/e2e_tests/embodied/maniskill_ppo_co_training_openpi_pi05.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 146
+tests/e2e_tests/embodied/robotwin_ppo_lingbotvlav2.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 1-46
+docs/source-en/rst_source/examples/embodied/lingbotvla.rst
+  s_a82621499db4ad::t_2a3aad37a4e667 1-2,13,15,24,50,130,153,183,222,290,301,314,335
+examples/embodiment/config/model/psi0.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 1-23
+docker/Dockerfile
+  s_a82621499db4ad::t_2a3aad37a4e667 13,88,410,413-414,510-519
+  s_a82621499db4ad::t_2e4c4102298fdb 520
+requirements/embodied/models/psi0.txt
+  s_a82621499db4ad::t_2a3aad37a4e667 1-13
+rlinf/workers/rollout/sglang/__init__.py
+  s_a82621499db4ad::t_2a3aad37a4e667 15,17,44-101
+rlinf/hybrid_engines/sglang/common/sgl_scheduler.py
+  s_a82621499db4ad::t_2a3aad37a4e667 116,120-121,124-125,227,306-308,348,354-357,365-366,370,395-397,406,409-411,416-418,693
+rlinf/envs/sim/simple/controller.py
+  s_a82621499db4ad::t_2a3aad37a4e667 1-196
+rlinf/algorithms/utils.py
+  s_a82621499db4ad::t_2a3aad37a4e667 22-67,359,387-388,411-414,426-429,447
+rlinf/workers/rollout/sglang/sglang_embodied_worker.py
+  s_a82621499db4ad::t_2a3aad37a4e667 157-163,216,229-231,249-251
+examples/agent/searchr1/config/train_glm4.7_flash_2node_server.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 1-311
+requirements/agentic/phyai_0.2.0rc1_common.txt
+  s_a82621499db4ad::t_2a3aad37a4e667 1-11
+examples/embodiment/config/libero_object_grpo_openpi.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 128
+examples/embodiment/config/robotwin_adjust_bottle_ppo_openpi.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 167
+rlinf/runners/reasoning_runner.py
+  s_a82621499db4ad::t_2a3aad37a4e667 425,455-466,471,604-628,636,643,648-654,701
+tests/e2e_tests/embodied/isaaclab_ppo_openpi_pi05.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 137
+rlinf/models/embodiment/psi0/__init__.py
+  s_a82621499db4ad::t_2a3aad37a4e667 1-68
+docs/source-en/rst_source/reference/algorithms/ppo.rst
+  s_a82621499db4ad::t_2a3aad37a4e667 105-132
+docs/source-zh/rst_source/examples/embodied/pi0.rst
+  s_a82621499db4ad::t_2a3aad37a4e667 413-424
+evaluations/run_eval.sh
+  s_a82621499db4ad::t_2a3aad37a4e667 53
+tests/e2e_tests/embodied/libero_10_ppo_openpi_pi05_musa.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 137
+docs/source-en/rst_source/examples/agentic/searchr1/glm4.7_flash.rst
+  s_a82621499db4ad::t_2a3aad37a4e667 123-160
+examples/embodiment/config/calvin_abcd_d_ppo_openpi_pi05.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 142
+tests/unit_tests/test_data.py
+  s_a82621499db4ad::t_2a3aad37a4e667 2619-2712,2869,3182,3237
+rlinf/models/embodiment/psi0/psi0_sampler.py
+  s_a82621499db4ad::t_2a3aad37a4e667 1-215
+requirements/agentic/phyai_0.2.0rc1_cu12.txt
+  s_a82621499db4ad::t_2a3aad37a4e667 1-9
+docs/source-zh/rst_source/guides/index.rst
+  s_a82621499db4ad::t_2a3aad37a4e667 46
+examples/embodiment/config/libero_10_ppo_openpi.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 134
+docs/source-en/rst_source/guides/rollout-engines/index.rst
+  s_a82621499db4ad::t_2a3aad37a4e667 25-26,35
+evaluations/simple/simple_psi0_eval.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 1-76
+requirements/embodied/models/gr00t_n1d7.txt
+  s_a82621499db4ad::t_2a3aad37a4e667 3-5
+docs/source-en/rst_source/guides/rollout-engines/phyai.rst
+  s_a82621499db4ad::t_2a3aad37a4e667 1-149
+docs/source-en/rst_source/examples/embodied/lingbotvla_index.rst
+  s_a82621499db4ad::t_2a3aad37a4e667 1-35
+docs/source-zh/rst_source/examples/embodied/sft_openpi.rst
+  s_a82621499db4ad::t_2a3aad37a4e667 100-105
+docs/source-zh/rst_source/resources/maintainer_policy.rst
+  s_a82621499db4ad::t_2a3aad37a4e667 81,85,89,93,211
+examples/embodiment/config/libero_object_grpo_openpi_pi05.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 133
+examples/embodiment/config/model/lingbotvlav2.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 1-24
+rlinf/models/embodiment/lingbotvlav2/lingbotvlav2_action_model.py
+  s_a82621499db4ad::t_2a3aad37a4e667 1-466
+rlinf/models/embodiment/lingbotvlav2/utils.py
+  s_a82621499db4ad::t_2a3aad37a4e667 1-161
+examples/embodiment/config/libero_spatial_ppo_openpi_pi05_phyai.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 1-161
+tests/e2e_tests/embodied/roboverse_ppo_openpi_pi05.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 148
+tests/e2e_tests/sft/maniskill_sft_openpi.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 67
+docs/source-zh/rst_source/evaluations/guides/simple.rst
+  s_a82621499db4ad::t_2a3aad37a4e667 1-251
+tests/e2e_tests/embodied/maniskill_ppo_openpi05_pipeline.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 160
+README.md
+  s_a82621499db4ad::t_2a3aad37a4e667 11,14,37-38,40,90,184-185,271
+requirements/agentic/phyai_0.2.0rc1_cu13.txt
+  s_a82621499db4ad::t_2a3aad37a4e667 1-9
+rlinf/envs/__init__.py
+  s_a82621499db4ad::t_2a3aad37a4e667 47,194-197
+tests/unit_tests/test_robotics.py
+  s_a82621499db4ad::t_2a3aad37a4e667 4314-4333
+docs/source-en/rst_source/evaluations/guides/simple.rst
+  s_a82621499db4ad::t_2a3aad37a4e667 1-262
+tests/robot_mocks/__init__.py
+  s_a82621499db4ad::t_2a3aad37a4e667 35,101-136,166-168,176-178,214
+docs/source-en/rst_source/evaluations/guides/robotwin.rst
+  s_a82621499db4ad::t_2a3aad37a4e667 18,83,86-89,205,211-216
+  s_a82621499db4ad::t_df2886184820f8 217
+docs/source-en/rst_source/examples/embodied/pi0.rst
+  s_a82621499db4ad::t_2a3aad37a4e667 444-456
+examples/agent/wideseek_r1/train.py
+  s_a82621499db4ad::t_2a3aad37a4e667 94,96
+examples/embodiment/config/libero_goal_ppo_openpi_pi05.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 136
+requirements/install.sh
+  s_a82621499db4ad::t_2a3aad37a4e667 120-121,148-150,357-389,974,981-982,1092,1505,2667-2772,3042-3063,3334,3392-3395,3663-3664,3703-3730,4376,4414-4416,4438-4440,4472-4474
+  s_a82621499db4ad::t_1f51adc8c51ca8 122
+rlinf/workers/rollout/utils.py
+  s_a82621499db4ad::t_2a3aad37a4e667 251-290
+rlinf/hybrid_engines/sglang/common/http_routes.py
+  s_a82621499db4ad::t_2a3aad37a4e667 1-101
+evaluations/robotwin/robotwin_click_bell_lingbotvlav2_eval.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 1-75
+docs/source-zh/rst_source/examples/embodied/lingbotvla_index.rst
+  s_a82621499db4ad::t_2a3aad37a4e667 1-33
+examples/embodiment/config/robotwin_click_bell_ppo_lingbotvlav2.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 1-174
+examples/embodiment/config/simple_openoven_ppo_psi0.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 1-133
+rlinf/workers/rollout/sglang/backends.py
+  s_a82621499db4ad::t_2a3aad37a4e667 1-372
+README.zh-CN.md
+  s_a82621499db4ad::t_2a3aad37a4e667 11,14,36-37,39,89,185-186,272
+rlinf/workers/actor/megatron_actor_worker.py
+  s_a82621499db4ad::t_2a3aad37a4e667 26,41-44,229-233,332-337,344-345
+  s_a82621499db4ad::t_858b42a32cf39f 346
+rlinf/workers/rollout/server/online_router_worker.py
+  s_a82621499db4ad::t_2a3aad37a4e667 69-75,154,159
+tests/unit_tests/test_utils.py
+  s_a82621499db4ad::t_2a3aad37a4e667 20,26,34-38,41,305-522
+  s_a82621499db4ad::t_4cf95fdf3f0e5b 523-524
+tests/e2e_tests/embodied/simple_openoven_ppo_psi0.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 1-133
+docs/source-zh/rst_source/examples/agentic/searchr1/glm4.7_flash.rst
+  s_a82621499db4ad::t_2a3aad37a4e667 106-136
+examples/agent/rstar2/main_rstar2.py
+  s_a82621499db4ad::t_2a3aad37a4e667 67-68
+rlinf/envs/sim/simple/dataset.py
+  s_a82621499db4ad::t_2a3aad37a4e667 1-72
+rlinf/envs/sim/world_model/env.py
+  s_a82621499db4ad::t_2a3aad37a4e667 80-91,639-640,645-653,660-661,663,665-666
+rlinf/runners/reasoning_eval_runner.py
+  s_a82621499db4ad::t_2a3aad37a4e667 152-163,166
+rlinf/workers/actor/embodied_fsdp_actor_worker.py
+  s_a82621499db4ad::t_2a3aad37a4e667 63-81,439-445,453-461,493-494,497-506,510-511,513-520,522-523,822-826,832
+rlinf/workers/rollout/backend.py
+  s_a82621499db4ad::t_2a3aad37a4e667 1-120
+docs/source-en/rst_source/examples/embodied/dual_franka_pico_dagger.rst
+  s_a82621499db4ad::t_2a3aad37a4e667 410-415
+docs/source-en/rst_source/guides/index.rst
+  s_a82621499db4ad::t_2a3aad37a4e667 47
+evaluations/eval_embodied_agent.py
+  s_a82621499db4ad::t_2a3aad37a4e667 89-96,107
+examples/embodiment/config/libero_goal_grpo_openpi_pi05.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 133
+requirements/embodied/models/gr00t.txt
+  s_a82621499db4ad::t_2a3aad37a4e667 1-3
+examples/embodiment/config/roboverse_ppo_openpi_pi05.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 150
+.github/CODEOWNERS
+  s_a82621499db4ad::t_2a3aad37a4e667 5,12-13,30-31,38
+examples/embodiment/config/calvin_abc_d_ppo_openpi_pi05.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 142
+examples/embodiment/config/libero_10_ppo_openpi_pi05.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 138
+examples/embodiment/config/libero_spatial_grpo_openpi_pi05.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 129
+docs/source-zh/rst_source/guides/embodiment_config.rst
+  s_a82621499db4ad::t_2a3aad37a4e667 139-142
+examples/embodiment/config/maniskill_ppo_co_training_openpi_pi05.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 145
+rlinf/models/embodiment/lingbotvlav2/__init__.py
+  s_a82621499db4ad::t_2a3aad37a4e667 1-23
+rlinf/workers/rollout/sglang/sglang_agent_worker.py
+  s_a82621499db4ad::t_2a3aad37a4e667 118,144
+examples/agent/wideseek_r1/eval.py
+  s_a82621499db4ad::t_2a3aad37a4e667 151,153
+rlinf/workers/rollout/hf/huggingface_worker.py
+  s_a82621499db4ad::t_2a3aad37a4e667 248-279,295-299,318-319,377,379-390,527-528,763-771,997,1010-1012,1032-1034,1137-1138
+  s_a82621499db4ad::t_852d30502299bc 1139
+examples/embodiment/config/libero_goal_grpo_openpi.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 127
+docs/source-en/rst_source/guides/embodiment_config.rst
+  s_a82621499db4ad::t_2a3aad37a4e667 145-149
+rlinf/envs/sim/simple/simple_env.py
+  s_a82621499db4ad::t_2a3aad37a4e667 1-511
+tests/e2e_tests/evaluations/simple_openoven_psi0_eval.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 1-69
+docs/source-zh/rst_source/examples/embodied/psi0.rst
+  s_a82621499db4ad::t_2a3aad37a4e667 1-233
+examples/embodiment/config/metaworld_45_ppo_openpi.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 135
+tests/e2e_tests/embodied/libero_spatial_ppo_openpi.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 147
+tests/unit_tests/test_models.py
+  s_a82621499db4ad::t_2a3aad37a4e667 21-24,37,47,57-58,1466-2190,2275-2487
+examples/embodiment/config/libero_spatial_async_ppo_openpi.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 140
+requirements/embodied/envs/simple.txt
+  s_a82621499db4ad::t_2a3aad37a4e667 1-11
+docs/source-zh/rst_source/guides/sglang_server.rst
+  s_a82621499db4ad::t_2a3aad37a4e667 69,185,214,306
+examples/embodiment/train_embodied_agent.py
+  s_a82621499db4ad::t_2a3aad37a4e667 110-129,149
+rlinf/utils/http_client.py
+  s_a82621499db4ad::t_2a3aad37a4e667 18,20,39-47,99,104,112-117,120-122,150-155,158-160,183-213,222-229,251-255,264-265,393-400
+rlinf/workers/agent/agent_loop.py
+  s_a82621499db4ad::t_2a3aad37a4e667 158-161
+rlinf/workers/rollout/sglang/sglang_worker.py
+  s_a82621499db4ad::t_2a3aad37a4e667 18-19,35-43,72-79,160-165,182-184,188-190,254-259,261,270-271,277-281,283-284,307-310,323,335-350,352-388,395-432,434-444,446-457,463-466,468-469,471,477-478,480,491-493,497-499,503-505,508-510,583-599,601-608,610-615,617-619,621-658,660-679,688-691,698-732,738-741
+tests/e2e_tests/embodied/gsenv_ppo_openpi_pi05.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 138
+examples/embodiment/config/libero_spatial_ppo_openpi_pi05.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 136
+examples/embodiment/config/maniskill_async_ppo_openpi.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 150
+rlinf/scheduler/hardware/accelerators/ascend_npu.py
+  s_a82621499db4ad::t_2a3aad37a4e667 109
+.github/workflows/unit-tests.yml
+  s_a82621499db4ad::t_2a3aad37a4e667 55
+rlinf/workers/rollout/sglang/process.py
+  s_a82621499db4ad::t_2a3aad37a4e667 22,29-33,44-77,83-86,95-107,116-123,127-128,142-150,154-160,167-176,222-229,234-239,242-244,251-269,272-274,280-287,289,295-302,304,307-311,313,316-317,321,328-338,349-350,353-384,386-418,422,429-433,445,450,464-509
+examples/embodiment/config/gsenv_ppo_openpi_pi05.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 139
+rlinf/workers/rollout/vllm/vllm_worker.py
+  s_a82621499db4ad::t_2a3aad37a4e667 56,335-341
+  s_a82621499db4ad::t_f3de23c42068ae 342
+examples/embodiment/config/libero_spatial_async_ppo_openpi_pi05.yaml
+  s_a82621499db4ad::t_2a3aad37a4e667 136
+---
+{
+  "schema_version": "authorship/3.1.0",
+  "tlab_version": "0.14.2",
+  "base_commit_sha": "6a0f242370eeefecfc9d5c1a949e8a15075f85fe",
+  "prompts": {},
+  "sessions": {
+    "s_a82621499db4ad": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "56c24dcf-ba34-46d0-9c7c-53efac749cbc",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Jonas.Lin 林奕仁 <jonaslin@agibot.com>",
+      "custom_attributes": {
+        "tlab.token_usage.input_tokens": "16592",
+        "tlab.token_usage.output_tokens": "231826",
+        "tlab.token_usage.cache_creation_tokens": "7628574",
+        "tlab.token_usage.cache_read_tokens": "95509474",
+        "tlab.session_started_at": "2026-11-03T14:07:08Z"
+      }
+    }
+  }
+}
