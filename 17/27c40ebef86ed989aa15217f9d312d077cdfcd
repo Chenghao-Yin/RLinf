@@ -1,0 +1,44 @@
+docs/source-en/rst_source/examples/embodied/geniesim.rst
+  s_a82621499db4ad::t_b9021a42fdea18 21-23,103,115,129-130,140,152,183-187,211,217,282-283,290-292,295-299,323,327,333
+docs/source-zh/rst_source/examples/embodied/geniesim.rst
+  s_a82621499db4ad::t_c410bbc2efb251 13,15,20,45-46,51,73,82,84,86,88,90,95,100,104,114,123,125,137,146,148,150,163,170,174,181,188,230,232,239,241,245,247,258,260,264,271,282,285,294,296,381,383,385,387-388,410,413,416,419,422,425,428,431,434,437,440,443,446
+examples/embodiment/config/geniesim_multitask10_ppo_openpi_pi05.yaml
+  s_a82621499db4ad::t_41134f42b6e959 165
+examples/embodiment/config/geniesim_multitask4_ppo_openpi_pi05.yaml
+  s_a82621499db4ad::t_17d4c4210c5c9f 131
+examples/embodiment/config/geniesim_multitask6_ppo_openpi_pi05.yaml
+  s_a82621499db4ad::t_e2d6aa34e0b03a 139
+rlinf/envs/sim/geniesim/geniesim_env.py
+  s_a82621499db4ad::t_53d4680cef4ff9 25-40,58-63,86-90,92,94-96,99-103,106-107,109-112,114-115,117-121,123,126-134,136-137,139-141,143-156,247-249,276-287,458-464,513,630,790
+rlinf/envs/sim/geniesim/resolvers.py
+  s_a82621499db4ad::t_f395521c9fcfc7 1-303
+rlinf/envs/sim/geniesim/work_items.py
+  s_a82621499db4ad::t_88c6dbeed30ae3 15,19-21,26-83,86-90,92-178
+rlinf/models/embodiment/openpi/policies/geniesim_policy.py
+  s_a82621499db4ad::t_0926953480dd84 92
+tests/unit_tests/test_geniesim_env.py
+  s_a82621499db4ad::t_0b9fb889705a1b 29-33,76,104,272
+---
+{
+  "schema_version": "authorship/3.1.0",
+  "tlab_version": "0.14.2",
+  "base_commit_sha": "1727c40ebef86ed989aa15217f9d312d077cdfcd",
+  "prompts": {},
+  "sessions": {
+    "s_a82621499db4ad": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "56c24dcf-ba34-46d0-9c7c-53efac749cbc",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Jonas.Lin 林奕仁 <jonaslin@agibot.com>",
+      "custom_attributes": {
+        "tlab.token_usage.cache_creation_tokens": "8990246",
+        "tlab.token_usage.input_tokens": "17216",
+        "tlab.token_usage.cache_read_tokens": "107802807",
+        "tlab.token_usage.output_tokens": "249462",
+        "tlab.session_started_at": "2026-10-27T12:42:09Z"
+      }
+    }
+  }
+}
